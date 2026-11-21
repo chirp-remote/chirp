@@ -6,12 +6,12 @@ body:
         > [!WARNING]
         > **Never post a Chirp code or link**, not even an expired one, or a password, token or TURN credential. Remove them from any log, setting or screenshot you paste. Discussions are public.
         >
-        > Anything that could weaken PIN generation or redemption, the consent prompt or the session lifecycle is security-sensitive even when it looks cosmetic. Email [security@fabrintek.com.br](mailto:security@fabrintek.com.br) instead of posting it here; see [SECURITY.md](https://github.com/barahn/chirp/blob/main/SECURITY.md).
+        > Anything that could weaken PIN generation or redemption, the consent prompt or the session lifecycle is security-sensitive even when it looks cosmetic. Email [security@fabrintek.com.br](mailto:security@fabrintek.com.br) instead of posting it here; see [SECURITY.md](https://github.com/chirp-remote/chirp/blob/main/SECURITY.md).
   - type: textarea
     id: question
     attributes:
       label: Your question
-      description: What are you trying to do, and where are you stuck? A bug with steps to reproduce belongs in an [issue](https://github.com/barahn/chirp/issues/new).
+      description: What are you trying to do, and where are you stuck? A bug with steps to reproduce belongs in an [issue](https://github.com/chirp-remote/chirp/issues/new).
     validations:
       required: true
   - type: textarea
