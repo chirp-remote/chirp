@@ -490,6 +490,50 @@ func TestRoleIsRequired(t *testing.T) {
 	}
 }
 
+// stateAtJoin is a controller's end of a session that notes the session's
+// state at the moment it is told the owner is in.
+type stateAtJoin struct {
+	sessions *session.SessionManager
+	id       string
+	state    session.SessionState
+}
+
+func (c *stateAtJoin) Send(data []byte) error {
+	var m map[string]string
+	if json.Unmarshal(data, &m) == nil && m["type"] == PeerJoinedType {
+		if sess, err := c.sessions.GetSession(c.id); err == nil {
+			c.state = sess.State
+		}
+	}
+	return nil
+}
+
+func (c *stateAtJoin) Close() error { return nil }
+
+// A controller told that the owner is in may take the owner to be asked
+// already, and the owner may answer at once: the relay asks before it tells.
+func TestTheOwnerIsAskedBeforeEitherEndHearsTheOtherIsIn(t *testing.T) {
+	srv, ts := newServer(t)
+	owner := register(t, ts, "Ana")
+	dialOwner(t, ts, owner.PeerID)
+	waitFor(t, "the relay to register the owner socket", func() bool {
+		srv.ownersMu.Lock()
+		defer srv.ownersMu.Unlock()
+		_, open := srv.owners[rendezvous.PeerID(owner.PeerID)]
+		return open
+	})
+	sess, _ := redeem(t, ts, owner.Code, "Bruno")
+
+	ctrl := &stateAtJoin{sessions: srv.sessions, id: sess.SessionID}
+	if err := srv.hub.Join(sess.SessionID, RoleController, ctrl); err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { srv.hub.Leave(sess.SessionID, RoleController) })
+	if ctrl.state != session.StateConsentRequested {
+		t.Fatalf("the controller heard the owner was in while the session was %q, want %q", ctrl.state, session.StateConsentRequested)
+	}
+}
+
 func TestOwnerSocketNeedsItsCredential(t *testing.T) {
 	srv, ts := newServer(t)
 	if _, resp, err := dial(t, ts, url.Values{"role": {"owner"}, "peer": {"nobody"}}); err == nil ||

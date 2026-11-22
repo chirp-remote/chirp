@@ -143,12 +143,18 @@ PKGS="$(tracked_packages)"
 	# between runs without the tree changing, and the workflow commits whatever
 	# this script produces. Leaving them in would mean a churn commit on every
 	# push to main.
+	#
+	# A failing run is kept whole, so its "--- FAIL" lines name the tests; only
+	# the timestamped lines the standard logger writes are dropped, as noise
+	# that changes on every run.
 	printf '**Test state** at this refresh:\n\n```\n'
 	# shellcheck disable=SC2086 # one argument per package
 	if TEST_OUT="$(go test -count=1 $PKGS 2>&1)"; then
 		printf '%s\n' "$TEST_OUT" | sed -E 's/[[:space:]]+(\(cached\)|[0-9]+\.[0-9]+s)$//' | tail -20
 	else
-		printf 'FAILING:\n%s\n' "$TEST_OUT" | sed -E 's/[[:space:]]+(\(cached\)|[0-9]+\.[0-9]+s)$//' | tail -25
+		printf 'FAILING:\n%s\n' "$TEST_OUT" |
+			grep -Ev '^[0-9]{4}/[0-9]{2}/[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2} ' |
+			sed -E 's/[[:space:]]+(\(cached\)|[0-9]+\.[0-9]+s)$//; s/ \([0-9]+\.[0-9]+s\)$//'
 	fi
 	printf '```\n'
 } > "$SNAPSHOT"

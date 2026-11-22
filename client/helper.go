@@ -174,7 +174,7 @@ func (c *Client) follow(ctx context.Context, sock *Socket, sess Session, emit fu
 			switch m.Type {
 			case TypePeerJoined:
 				// Both ends are in, so the relay is asking the owner now
-				// (signalling.maybeAskConsent). Say so without waiting for
+				// (signalling's askConsent). Say so without waiting for
 				// the next poll; the polls then follow the decision.
 				if !allowed {
 					emit(HelperEvent{Phase: HelperAsking, Session: sess})
