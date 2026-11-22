@@ -109,6 +109,11 @@ func Admissible(s *session.Session) error {
 type Hub struct {
 	sessions *session.SessionManager
 
+	// paired runs once both ends of a session are registered, before either
+	// is told the other is in, so what it does is done by the time they hear;
+	// the func it returns, if any, runs after they are told.
+	paired func(sessionID string) (after func())
+
 	mu     sync.Mutex
 	pairs  map[string]*pair
 	closed bool
@@ -169,8 +174,15 @@ func (h *Hub) Join(sessionID string, role Role, conn Conn) error {
 	// is best effort: a peer that cannot be written to is going away, and its
 	// read loop ends on its own.
 	if other != nil {
+		var after func()
+		if h.paired != nil {
+			after = h.paired(sessionID)
+		}
 		_ = other.Send(encodeNotice(PeerJoinedType, role))
 		_ = conn.Send(encodeNotice(PeerJoinedType, role.opposite()))
+		if after != nil {
+			after()
+		}
 	}
 	return nil
 }
