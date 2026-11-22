@@ -9,6 +9,10 @@ on:
   pull_request:
     branches: [ main ]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
@@ -32,9 +36,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
-      contents: read
-      # Needed to post the summary comment on the pull request.
-      pull-requests: write
+      contents: read       # read dependency manifests
+      pull-requests: write # post the summary comment on the pull request
     steps:
       # Audit mode: harden-runner records what each job talks to without
       # blocking it. Read the egress report on a few green runs, then turn this
