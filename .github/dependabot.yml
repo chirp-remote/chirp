@@ -10,6 +10,8 @@ updates:
       interval: weekly
       day: monday
       time: "06:23"
+    cooldown:
+      default-days: 7
     open-pull-requests-limit: 5
     target-branch: main
     commit-message:
@@ -33,6 +35,8 @@ updates:
       interval: weekly
       day: monday
       time: "06:41"
+    cooldown:
+      default-days: 7
     open-pull-requests-limit: 5
     target-branch: main
     commit-message:
@@ -53,6 +57,8 @@ updates:
       interval: weekly
       day: monday
       time: "06:59"
+    cooldown:
+      default-days: 7
     open-pull-requests-limit: 5
     target-branch: main
     commit-message:

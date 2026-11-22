@@ -51,6 +51,7 @@ jobs:
           # cached, which can lag a security release by days. govulncheck
           # below then fails on standard-library fixes that are already out.
           check-latest: true
+          cache: false
 
       # cmd/chirp draws its window with Fyne, which needs cgo and the system's
       # OpenGL, X11 and Wayland headers to build (HANDOFF §5.6). Every later
@@ -132,7 +133,9 @@ jobs:
           CGO_ENABLED: 0
         run: |
           PKGS=$(go list ./... | grep -Ev '/cmd/chirp(/|$)')
+          # shellcheck disable=SC2086 # one argument per package
           GOOS=windows GOARCH=amd64 go build $PKGS
+          # shellcheck disable=SC2086 # one argument per package
           GOOS=darwin GOARCH=amd64 go build $PKGS
 
       - name: Lint
@@ -217,6 +220,7 @@ jobs:
         with:
           go-version: '1.26'
           check-latest: true
+          cache: false
 
       - name: Build
         env:
