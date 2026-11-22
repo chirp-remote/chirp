@@ -58,6 +58,11 @@ func TestParseTarget(t *testing.T) {
 }
 
 func FuzzParseTarget(f *testing.F) {
+	addTargetSeeds(f)
+	f.Fuzz(checkParsedTarget)
+}
+
+func addTargetSeeds(f *testing.F) {
 	v := readLinkFragments(f)
 	for _, c := range v.Cases {
 		f.Add(c.Fragment)
@@ -73,34 +78,39 @@ func FuzzParseTarget(f *testing.F) {
 	} {
 		f.Add(s)
 	}
-	f.Fuzz(func(t *testing.T, s string) {
-		got, err := ParseTarget(s)
-		if err != nil {
-			return
-		}
-		if (got.Code != "") == (got.Token != "") {
-			t.Fatalf("ParseTarget(%q) = %+v, want exactly one of Code or Token", s, got)
-		}
-		if got.Code != "" {
-			checkCodeRoundTrips(t, s, got.Code)
-		}
-		if got.Token != "" && !validToken(got.Token) {
-			t.Fatalf("ParseTarget(%q).Token = %q is not a valid token", s, got.Token)
-		}
-		if got.Secret != "" && !validSecret(got.Secret) {
-			t.Fatalf("ParseTarget(%q).Secret = %q is not a valid secret", s, got.Secret)
-		}
-	})
+}
+
+func checkParsedTarget(t *testing.T, s string) {
+	got, err := ParseTarget(s)
+	if err != nil {
+		return
+	}
+	if (got.Code != "") == (got.Token != "") {
+		t.Fatalf("ParseTarget(%q) = %+v, want exactly one of Code or Token", s, got)
+	}
+	checkCodeRoundTrips(t, s, got.Code)
+	checkShape(t, s, "Token", got.Token, validToken)
+	checkShape(t, s, "Secret", got.Secret, validSecret)
 }
 
 func checkCodeRoundTrips(t *testing.T, s, code string) {
 	t.Helper()
+	if code == "" {
+		return
+	}
 	if len(code) != 6 {
 		t.Fatalf("ParseTarget(%q).Code = %q, want 6 digits", s, code)
 	}
 	again, err := ParseTarget(code)
-	if err != nil || again.Code != code || again.Secret != "" {
+	if err != nil || again != (Target{Code: code}) {
 		t.Fatalf("ParseTarget(%q) -> %+v did not round-trip Code", s, again)
+	}
+}
+
+func checkShape(t *testing.T, s, field, value string, valid func(string) bool) {
+	t.Helper()
+	if value != "" && !valid(value) {
+		t.Fatalf("ParseTarget(%q).%s = %q is not a valid %s", s, field, value, field)
 	}
 }
 

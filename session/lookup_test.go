@@ -174,8 +174,13 @@ func lowercaseKey(k string) bool {
 
 func websocketRelay(relay string) bool {
 	u, err := url.Parse(relay)
-	if err != nil || u.Host == "" || u.User != nil {
+	if err != nil || u.User != nil {
 		return false
 	}
-	return u.Scheme == "ws" || u.Scheme == "wss"
+	switch u.Scheme {
+	case "ws", "wss":
+		return u.Host != ""
+	default:
+		return false
+	}
 }
