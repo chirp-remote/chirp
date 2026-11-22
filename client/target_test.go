@@ -88,42 +88,38 @@ func checkParsedTarget(t *testing.T, s string) {
 	if (got.Code != "") == (got.Token != "") {
 		t.Fatalf("ParseTarget(%q) = %+v, want exactly one of Code or Token", s, got)
 	}
-	checkCodeRoundTrips(t, s, got.Code)
-	parsedField{"Token", got.Token, validToken}.check(t, s)
-	parsedField{"Secret", got.Secret, validSecret}.check(t, s)
+	checkCodeRoundTrips(t, got)
+	parsedField{"Token", got.Token, 43, isToken}.check(t)
+	parsedField{"Secret", got.Secret, SecretLength, isSecret}.check(t)
 }
 
-func checkCodeRoundTrips(t *testing.T, s, code string) {
+func checkCodeRoundTrips(t *testing.T, got Target) {
 	t.Helper()
-	if code == "" {
+	if got.Code == "" {
 		return
 	}
-	if len(code) != 6 {
-		t.Fatalf("ParseTarget(%q).Code = %q, want 6 digits", s, code)
+	if len(got.Code) != 6 {
+		t.Fatalf("Code = %q, want 6 digits", got.Code)
 	}
-	again, err := ParseTarget(code)
-	if err != nil || again != (Target{Code: code}) {
-		t.Fatalf("ParseTarget(%q) -> %+v did not round-trip Code", s, again)
+	again, err := ParseTarget(got.Code)
+	if err != nil || again != (Target{Code: got.Code}) {
+		t.Fatalf("Code %q parsed again gives %+v, %v", got.Code, again, err)
 	}
 }
 
 type parsedField struct {
-	name  string
-	value string
-	valid func(string) bool
+	name   string
+	value  string
+	length int
+	valid  func(string) bool
 }
 
-func (f parsedField) check(t *testing.T, s string) {
+func (f parsedField) check(t *testing.T) {
 	t.Helper()
-	if f.value != "" && !f.valid(f.value) {
-		t.Fatalf("ParseTarget(%q).%s = %q is not a valid %s", s, f.name, f.value, f.name)
+	if f.value == "" {
+		return
 	}
-}
-
-func validToken(s string) bool {
-	return len(s) == 43 && isToken(s)
-}
-
-func validSecret(s string) bool {
-	return len(s) == SecretLength && isSecret(s)
+	if len(f.value) != f.length || !f.valid(f.value) {
+		t.Fatalf("%s = %q is not a valid %s", f.name, f.value, f.name)
+	}
 }
