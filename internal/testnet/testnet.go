@@ -60,7 +60,7 @@ func FreeUDPAndTCPPort() (int, error) {
 	low := ephemeralLow()
 	var errs []error
 	for range attempts {
-		port := minFixedPort + rand.IntN(low-minFixedPort)
+		port := minFixedPort + rand.IntN(low-minFixedPort) // #nosec G404 -- spreads test ports, not a secret
 		udpErr := bindAndRelease("udp4", port)
 		tcpErr := bindAndRelease("tcp4", port)
 		if udpErr == nil && tcpErr == nil {
