@@ -89,8 +89,8 @@ func checkParsedTarget(t *testing.T, s string) {
 		t.Fatalf("ParseTarget(%q) = %+v, want exactly one of Code or Token", s, got)
 	}
 	checkCodeRoundTrips(t, s, got.Code)
-	checkShape(t, s, "Token", got.Token, validToken)
-	checkShape(t, s, "Secret", got.Secret, validSecret)
+	parsedField{"Token", got.Token, validToken}.check(t, s)
+	parsedField{"Secret", got.Secret, validSecret}.check(t, s)
 }
 
 func checkCodeRoundTrips(t *testing.T, s, code string) {
@@ -107,10 +107,16 @@ func checkCodeRoundTrips(t *testing.T, s, code string) {
 	}
 }
 
-func checkShape(t *testing.T, s, field, value string, valid func(string) bool) {
+type parsedField struct {
+	name  string
+	value string
+	valid func(string) bool
+}
+
+func (f parsedField) check(t *testing.T, s string) {
 	t.Helper()
-	if value != "" && !valid(value) {
-		t.Fatalf("ParseTarget(%q).%s = %q is not a valid %s", s, field, value, field)
+	if f.value != "" && !f.valid(f.value) {
+		t.Fatalf("ParseTarget(%q).%s = %q is not a valid %s", s, f.name, f.value, f.name)
 	}
 }
 
