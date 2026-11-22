@@ -38,7 +38,8 @@ type Prober struct {
 }
 
 func newClient() *http.Client {
-	transport := http.DefaultTransport.(*http.Transport).Clone()
+	base, _ := http.DefaultTransport.(*http.Transport)
+	transport := base.Clone()
 	transport.DisableKeepAlives = true
 	transport.Proxy = nil
 	return &http.Client{

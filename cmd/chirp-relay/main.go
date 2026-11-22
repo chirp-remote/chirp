@@ -110,6 +110,7 @@ func main() {
 	if err := serveUntilSignalled(srv, ln); err != nil {
 		log.Printf("chirp-relay: %v", err)
 		sm.Close()
+		//nolint:gocritic // sm.Close is called explicitly above before exiting
 		os.Exit(1)
 	}
 }
@@ -185,7 +186,7 @@ func serveUntilSignalled(srv *http.Server, ln net.Listener) error {
 	defer stop()
 	go func() {
 		<-ctx.Done()
-		shutdown, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		shutdown, cancel := context.WithTimeout(context.WithoutCancel(ctx), 5*time.Second)
 		defer cancel()
 		_ = srv.Shutdown(shutdown)
 	}()
@@ -255,8 +256,9 @@ func (e endpoint) isSocket() bool {
 // cleanly is replaced; any other file at that path is an error, not something
 // to delete. The socket gets mode, whatever the umask.
 func listen(e endpoint, mode os.FileMode) (net.Listener, error) {
+	var lc net.ListenConfig
 	if !e.isSocket() {
-		return net.Listen(e.network, e.address)
+		return lc.Listen(context.Background(), e.network, e.address)
 	}
 	path := e.address
 	if fi, err := os.Lstat(path); err == nil {
@@ -267,7 +269,7 @@ func listen(e endpoint, mode os.FileMode) (net.Listener, error) {
 			return nil, err
 		}
 	}
-	ln, err := net.Listen("unix", path)
+	ln, err := lc.Listen(context.Background(), "unix", path)
 	if err != nil {
 		return nil, err
 	}
@@ -285,7 +287,11 @@ func probe(e endpoint) error {
 	if err != nil {
 		return err
 	}
-	resp, err := client.Get("http://" + target + "/healthz")
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, "http://"+target+"/healthz", nil)
+	if err != nil {
+		return err
+	}
+	resp, err := client.Do(req)
 	if err != nil {
 		return err
 	}

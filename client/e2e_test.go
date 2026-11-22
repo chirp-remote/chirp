@@ -100,6 +100,7 @@ func controllerProcess() int {
 		case HelperFailed:
 			fmt.Println("FAILED", ev.Err)
 			cancel()
+		default:
 		}
 	})
 	return status

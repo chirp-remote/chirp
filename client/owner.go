@@ -200,11 +200,11 @@ func (o *Owner) Run(ctx context.Context) error {
 		o.setPeerID("")
 		switch {
 		case errors.Is(err, errRenew):
-			o.release(shown.ID)
+			o.release(ctx, shown.ID)
 		case errors.Is(err, errLost):
 			// Nothing to release: the relay already has.
 		default:
-			o.release(shown.ID)
+			o.release(ctx, shown.ID)
 			return err
 		}
 	}
@@ -581,11 +581,11 @@ func (o *Owner) setPeerID(id string) {
 
 // release gives the registration up. It runs as the owner stops, when ctx may
 // already be done, so it has a short deadline of its own.
-func (o *Owner) release(id string) {
+func (o *Owner) release(ctx context.Context, id string) {
 	if id == "" {
 		return
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 5*time.Second)
 	defer cancel()
 	_ = o.client.Release(ctx, id)
 }

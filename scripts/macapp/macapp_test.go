@@ -7,6 +7,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"encoding/xml"
+	"errors"
 	"image/png"
 	"io"
 	"os"
@@ -162,7 +163,7 @@ func decodePlist(t *testing.T, b []byte) map[string]string {
 	inArray := false
 	for {
 		tok, err := dec.Token()
-		if err == io.EOF {
+		if errors.Is(err, io.EOF) {
 			return out
 		}
 		if err != nil {
