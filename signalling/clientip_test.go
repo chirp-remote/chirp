@@ -5,6 +5,7 @@ package signalling
 
 import (
 	"net/http/httptest"
+	"net/netip"
 	"testing"
 )
 
@@ -81,4 +82,60 @@ func TestParsePrefixesRejectsGarbage(t *testing.T) {
 	if err != nil || len(got) != 0 {
 		t.Fatalf("an empty list: got %v, %v", got, err)
 	}
+}
+
+func FuzzParsePrefixes(f *testing.F) {
+	for _, s := range []string{
+		"127.0.0.1, 10.0.0.0/8, ::1/128",
+		"",
+		" ",
+		"not-an-ip",
+		"10.0.0.0/33",
+		"::ffff:127.0.0.1",
+	} {
+		f.Add(s)
+	}
+	f.Fuzz(func(t *testing.T, s string) {
+		prefixes, err := ParsePrefixes(s)
+		if err != nil {
+			return
+		}
+		for _, p := range prefixes {
+			if !p.IsValid() || p != p.Masked() {
+				t.Fatalf("ParsePrefixes(%q) returned non-canonical prefix %v", s, p)
+			}
+		}
+	})
+}
+
+func FuzzForwardedFor(f *testing.F) {
+	f.Add("127.0.0.1:4000", "203.0.113.7")
+	f.Add("127.0.0.1:4000", "1.2.3.4, 5.6.7.8, 127.0.0.1")
+	f.Add("127.0.0.1:4000", "203.0.113.7, nonsense")
+	f.Add("198.51.100.7:1234", "203.0.113.7")
+	f.Add("[::ffff:127.0.0.1]:4000", "::ffff:203.0.113.7")
+	f.Add("@", "203.0.113.7")
+
+	trusted := []netip.Prefix{netip.MustParsePrefix("127.0.0.1/32")}
+	clientIP := ForwardedFor(trusted)
+	f.Fuzz(func(t *testing.T, remoteAddr, xff string) {
+		r := httptest.NewRequest("GET", "/", nil)
+		r.RemoteAddr = remoteAddr
+		if xff != "" {
+			r.Header.Set("X-Forwarded-For", xff)
+		}
+		got := clientIP(r)
+		if remoteAddr == "198.51.100.7:1234" && got != "198.51.100.7" {
+			t.Fatalf("untrusted remoteAddr %q with XFF %q returned %q, want 198.51.100.7", remoteAddr, xff, got)
+		}
+
+		untrusted := httptest.NewRequest("GET", "/", nil)
+		untrusted.RemoteAddr = "198.51.100.7:1234"
+		if xff != "" {
+			untrusted.Header.Set("X-Forwarded-For", xff)
+		}
+		if got := clientIP(untrusted); got != "198.51.100.7" {
+			t.Fatalf("untrusted client with XFF %q returned %q, want 198.51.100.7", xff, got)
+		}
+	})
 }

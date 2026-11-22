@@ -30,10 +30,13 @@ not CLA acceptance, and that external pull requests are not merged yet.
 
 | Workflow | Runs on | Gate |
 | --- | --- | --- |
-| `ci.yml` | push and PR to `main`, tags | DCO, licence gate, build, vet, cross-compile, lint, `go test -race`, `HANDOFF.md` snapshot, gosec, govulncheck; separately, the relay's container image, deploy scripts and Quadlet units |
+| `ci.yml` | push and PR to `main`, tags | DCO, licence gate, build, vet, cross-compile, lint (`.golangci.yml`), `go test -race`, fuzz tests, `HANDOFF.md` snapshot, gosec, govulncheck; separately, the relay's container image, deploy scripts and Quadlet units |
 | `codeql.yml` | push and PR, weekly — **when `CODE_SCANNING` is set** | CodeQL `security-extended` for Go |
+| `zizmor.yml` | push and PR, weekly | `zizmor` (SARIF when `CODE_SCANNING` is set, annotations otherwise) and `actionlint` over workflows and `dependabot.yml` |
 | `secret-scan.yml` | push and PR, weekly | gitleaks over the PR commit range, or the tree and full history |
 | `dependency-review.yml` | PR — **when `CODE_SCANNING` is set** | what the PR adds: advisories at `low` and above, denied licences |
+| `scorecard.yml` | push to `main`, weekly, branch protection changes | OpenSSF Scorecard posture audit (SARIF when `CODE_SCANNING` is set, badge published for `README.md`) |
+| `release.yml` | published releases, manual dispatch | builds release binaries, checks them with `govulncheck -mode=binary`, bundles notices, signs checksums with Sigstore and attests provenance |
 | `sbom.yml` | release tags | SPDX SBOM attached to the release |
 
 ### CodeQL and dependency review are gated on `CODE_SCANNING`
@@ -74,6 +77,21 @@ Why the overlaps are not redundant:
   licence-*compatible* and still unacceptable — Fabrintek relicenses Chirp
   because it owns all of Chirp, and it owns none of its dependencies. See
   [LICENSING.md](../LICENSING.md).
+- **zizmor vs actionlint.** `actionlint` validates GitHub Actions workflow
+  syntax, expression types and embedded shell scripts via `shellcheck`. `zizmor`
+  audits workflows and `.github/dependabot.yml` for security issues — template
+  injection, cache poisoning, excessive token permissions and missing update
+  cooldowns.
+- **Source vs release binary vulnerability checks.** `ci.yml` runs `govulncheck`
+  against the source tree; `release.yml` additionally runs
+  `govulncheck -mode=binary` on every compiled release binary before signing and
+  attaching it, catching toolchain or standard-library CVEs linked into the
+  shipped artifacts.
+- **Advisory PR review.** [`.gemini/config.yaml`](../.gemini/config.yaml) and
+  [`.gemini/styleguide.md`](../.gemini/styleguide.md) configure Gemini Code
+  Assist for GitHub against Chirp's consent, PAKE-secret, licensing and cgo
+  invariants. It is advisory only and never replaces maintainer review or
+  required status checks.
 
 ### Supply chain
 
@@ -81,8 +99,12 @@ Why the overlaps are not redundant:
   trailing comment. A tag can be moved; a SHA cannot.
 - Go security tools are pinned to exact versions and run via `go run`, so the
   tool version lives in the workflow and is reviewed like any other change.
-- Dependabot rewrites both, weekly, into `main`. Pinning without an update
-  path is just freezing on a known-vulnerable version.
+- Dependabot rewrites both, weekly, into `main`, with a **7-day cooldown**
+  (`cooldown.default-days: 7`) on `gomod`, `github-actions` and `docker` so a
+  newly published compromised release is not proposed immediately. Pinning
+  without an update path is just freezing on a known-vulnerable version.
+- `actions/setup-go` sets `cache: false` in push/tag/release workflows so build
+  and release jobs never read from a mutable Actions cache.
 - Workflows declare `permissions: contents: read` at the top level; a job that
   needs more (SARIF upload, release assets, PR comments) asks for it and nothing
   else.

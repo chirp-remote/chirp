@@ -56,6 +56,7 @@ jobs:
         with:
           go-version-file: go.mod
           check-latest: true
+          cache: false
 
       - name: Install the GL, X11 and Wayland headers
         run: |
@@ -71,6 +72,12 @@ jobs:
             CGO_ENABLED=0 GOARCH=$arch go build -trimpath -ldflags='-s -w' -o "dist/chirp-relay-linux-$arch" ./cmd/chirp-relay
           done
           file dist/*
+
+      - name: Vulnerability Check (govulncheck -mode=binary)
+        run: |
+          go run golang.org/x/vuln/cmd/govulncheck@v1.7.0 -mode=binary dist/chirp-linux-amd64
+          go run golang.org/x/vuln/cmd/govulncheck@v1.7.0 -mode=binary dist/chirp-relay-linux-amd64
+          go run golang.org/x/vuln/cmd/govulncheck@v1.7.0 -mode=binary dist/chirp-relay-linux-arm64
 
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
@@ -92,6 +99,7 @@ jobs:
         with:
           go-version-file: go.mod
           check-latest: true
+          cache: false
 
       # Version information, icon and manifest (cmd/chirp/winres): the
       # committed .syso says 0.0.0-dev; this stamps the release's tag into it.
@@ -111,6 +119,10 @@ jobs:
         run: |
           mkdir -p dist
           go build -trimpath -ldflags='-s -w -H windowsgui' -o dist/chirp-windows-amd64.exe ./cmd/chirp
+
+      - name: Vulnerability Check (govulncheck -mode=binary)
+        shell: bash
+        run: go run golang.org/x/vuln/cmd/govulncheck@v1.7.0 -mode=binary dist/chirp-windows-amd64.exe
 
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
@@ -142,6 +154,7 @@ jobs:
         with:
           go-version-file: go.mod
           check-latest: true
+          cache: false
 
       - name: Build
         env:
@@ -153,6 +166,11 @@ jobs:
           lipo -create -output build/chirp-universal build/chirp-amd64 build/chirp-arm64
           lipo -info build/chirp-universal
           vtool -show-build build/chirp-universal | grep minos
+
+      - name: Vulnerability Check (govulncheck -mode=binary)
+        run: |
+          go run golang.org/x/vuln/cmd/govulncheck@v1.7.0 -mode=binary build/chirp-amd64
+          go run golang.org/x/vuln/cmd/govulncheck@v1.7.0 -mode=binary build/chirp-arm64
 
       - name: Bundle
         run: |

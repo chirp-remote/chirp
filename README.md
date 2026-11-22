@@ -18,6 +18,7 @@ account, and nothing happens on your screen until you press *Allow*.
 [![CI](https://github.com/barahn/chirp/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/barahn/chirp/actions/workflows/ci.yml)
 [![CodeQL](https://github.com/barahn/chirp/actions/workflows/codeql.yml/badge.svg?branch=main)](https://github.com/barahn/chirp/actions/workflows/codeql.yml)
 [![CodeScene Average Code Health](https://codescene.io/projects/87671/status-badges/average-code-health)](https://codescene.io/projects/87671)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/barahn/chirp/badge)](https://scorecard.dev/viewer/?uri=github.com/barahn/chirp)
 
 </div>
 

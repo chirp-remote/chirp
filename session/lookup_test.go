@@ -5,6 +5,7 @@ package session_test
 
 import (
 	"errors"
+	"net/url"
 	"strings"
 	"testing"
 	"time"
@@ -142,4 +143,28 @@ func TestLookupSharesTheRedemptionBudget(t *testing.T) {
 	if _, err := sm.Redeem(string(p.Code), "c", info()); !errors.Is(err, session.ErrThrottled) {
 		t.Fatalf("redeem after failed lookups: %v, want ErrThrottled", err)
 	}
+}
+
+func FuzzValidateContact(f *testing.F) {
+	f.Add(key, "wss://relay.example.org")
+	f.Add(key, "ws://192.0.2.7:7777/nostr")
+	f.Add(strings.ToUpper(key), "wss://r.example")
+	f.Add(key[:62], "wss://r.example")
+	f.Add(strings.Repeat("g", 64), "wss://r.example")
+	f.Add(key, "https://r.example")
+	f.Add(key, "wss://user:pass@r.example")
+	f.Add(key, "wss://")
+	f.Add(key, "wss://"+strings.Repeat("a", session.MaxContactRelayLen))
+	f.Fuzz(func(t *testing.T, k, relay string) {
+		if err := session.ValidateContact(session.Contact{Key: k, Relays: []string{relay}}); err != nil {
+			return
+		}
+		if len(k) != 64 || k != strings.ToLower(k) {
+			t.Fatalf("ValidateContact accepted invalid key %q", k)
+		}
+		u, err := url.Parse(relay)
+		if err != nil || (u.Scheme != "ws" && u.Scheme != "wss") || u.Host == "" || u.User != nil {
+			t.Fatalf("ValidateContact accepted invalid relay %q", relay)
+		}
+	})
 }

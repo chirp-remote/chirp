@@ -125,7 +125,8 @@ func validNonce(nonce string) bool {
 
 // Handler answers Path for the node holding key.
 func Handler(key ed25519.PrivateKey) http.Handler {
-	pub := b64.EncodeToString(key.Public().(ed25519.PublicKey))
+	pubKey, _ := key.Public().(ed25519.PublicKey)
+	pub := b64.EncodeToString(pubKey)
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		id := Identity{Key: pub}
 		if r.URL.Query().Has("nonce") {

@@ -51,6 +51,7 @@ jobs:
           # cached, which can lag a security release by days. govulncheck
           # below then fails on standard-library fixes that are already out.
           check-latest: true
+          cache: false
 
       # cmd/chirp draws its window with Fyne, which needs cgo and the system's
       # OpenGL, X11 and Wayland headers to build (HANDOFF §5.6). Every later
@@ -132,7 +133,9 @@ jobs:
           CGO_ENABLED: 0
         run: |
           PKGS=$(go list ./... | grep -Ev '/cmd/chirp(/|$)')
+          # shellcheck disable=SC2086 # one argument per package
           GOOS=windows GOARCH=amd64 go build $PKGS
+          # shellcheck disable=SC2086 # one argument per package
           GOOS=darwin GOARCH=amd64 go build $PKGS
 
       - name: Lint
@@ -157,6 +160,15 @@ jobs:
         env:
           CHIRP_REQUIRE_COTURN: "1"
         run: go test -race -coverprofile=coverage.out ./...
+
+      - name: Fuzz
+        run: |
+          go test -fuzz='^FuzzParseTarget$' -fuzztime=4s ./client
+          go test -fuzz='^FuzzFormatCode$' -fuzztime=4s ./cmd/chirp/internal/ui
+          go test -fuzz='^FuzzValidateContact$' -fuzztime=4s ./session
+          go test -fuzz='^FuzzParsePrefixes$' -fuzztime=4s ./signalling
+          go test -fuzz='^FuzzForwardedFor$' -fuzztime=4s ./signalling
+          go test -fuzz='^FuzzRelayTyped$' -fuzztime=4s ./signalling
 
       # HANDOFF.md's snapshot block is generated from the tree. Checked here
       # rather than committed by a bot: a workflow pushing to main would need a
@@ -208,6 +220,7 @@ jobs:
         with:
           go-version: '1.26'
           check-latest: true
+          cache: false
 
       - name: Build
         env:

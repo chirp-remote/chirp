@@ -127,7 +127,7 @@ func main() {
 	defer stop()
 	go func() {
 		<-ctx.Done()
-		shutdown, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		shutdown, cancel := context.WithTimeout(context.WithoutCancel(ctx), 5*time.Second)
 		defer cancel()
 		_ = srv.Shutdown(shutdown)
 	}()
@@ -138,6 +138,7 @@ func main() {
 		log.Printf("chirp-relay: %v", err)
 		stop()
 		sm.Close()
+		//nolint:gocritic // stop and sm.Close are called explicitly above before exiting
 		os.Exit(1)
 	}
 }
@@ -191,9 +192,10 @@ func socketPath(addr string) (string, bool) {
 // cleanly is replaced; any other file at that path is an error, not something
 // to delete. The socket gets mode, whatever the umask.
 func listen(addr string, mode os.FileMode) (net.Listener, error) {
+	var lc net.ListenConfig
 	path, unix := socketPath(addr)
 	if !unix {
-		return net.Listen("tcp", addr)
+		return lc.Listen(context.Background(), "tcp", addr)
 	}
 	if fi, err := os.Lstat(path); err == nil {
 		if fi.Mode().Type() != os.ModeSocket {
@@ -203,7 +205,7 @@ func listen(addr string, mode os.FileMode) (net.Listener, error) {
 			return nil, err
 		}
 	}
-	ln, err := net.Listen("unix", path)
+	ln, err := lc.Listen(context.Background(), "unix", path)
 	if err != nil {
 		return nil, err
 	}
@@ -236,7 +238,11 @@ func probe(addr string) error {
 		target = net.JoinHostPort(host, port)
 	}
 	client := &http.Client{Timeout: 3 * time.Second, Transport: transport}
-	resp, err := client.Get("http://" + target + "/healthz")
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, "http://"+target+"/healthz", nil)
+	if err != nil {
+		return err
+	}
+	resp, err := client.Do(req)
 	if err != nil {
 		return err
 	}
