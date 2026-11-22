@@ -368,3 +368,33 @@ func TestForwardRefusesTheRelaysOwnTypes(t *testing.T) {
 		t.Errorf("a type merely starting with chirp was refused: %v", err)
 	}
 }
+
+func FuzzRelayTyped(f *testing.F) {
+	for _, s := range []string{
+		`{"type":"chirp.error"}`,
+		`{"type":"chirp.peer_left","role":"controller"}`,
+		`{"TYPE":"chirp.error"}`,
+		`{"type":"offer","type":"chirp.peer_left"}`,
+		`{"type":"offer"}`,
+		`{"type":"chirpy"}`,
+		"not json",
+		"null",
+	} {
+		f.Add([]byte(s))
+	}
+	f.Fuzz(func(t *testing.T, data []byte) {
+		if !relayTyped(data) {
+			return
+		}
+		var obj map[string]any
+		if err := json.Unmarshal(data, &obj); err != nil || obj == nil {
+			t.Fatalf("relayTyped(%q) = true, but not a JSON object: %v", data, err)
+		}
+		var head struct {
+			Type string `json:"type"`
+		}
+		if err := json.Unmarshal(data, &head); err != nil || !strings.HasPrefix(head.Type, "chirp.") {
+			t.Fatalf("relayTyped(%q) = true, decoded type = %q, err = %v", data, head.Type, err)
+		}
+	})
+}

@@ -56,3 +56,45 @@ func TestParseTarget(t *testing.T) {
 		}
 	}
 }
+
+func FuzzParseTarget(f *testing.F) {
+	v := readLinkFragments(f)
+	for _, c := range v.Cases {
+		f.Add(c.Fragment)
+		f.Add(v.Page + c.Fragment)
+	}
+	for _, s := range []string{
+		"",
+		"482913",
+		"482-913",
+		"482-913-5071",
+		"482 913 5071",
+		"hello",
+	} {
+		f.Add(s)
+	}
+	f.Fuzz(func(t *testing.T, s string) {
+		got, err := ParseTarget(s)
+		if err != nil {
+			return
+		}
+		if (got.Code != "") == (got.Token != "") {
+			t.Fatalf("ParseTarget(%q) = %+v, want exactly one of Code or Token", s, got)
+		}
+		if got.Code != "" {
+			if len(got.Code) != 6 {
+				t.Fatalf("ParseTarget(%q).Code = %q, want 6 digits", s, got.Code)
+			}
+			again, err := ParseTarget(got.Code)
+			if err != nil || again.Code != got.Code || again.Secret != "" {
+				t.Fatalf("ParseTarget(%q) -> %+v did not round-trip Code", s, again)
+			}
+		}
+		if got.Token != "" && (len(got.Token) != 43 || !isToken(got.Token)) {
+			t.Fatalf("ParseTarget(%q).Token = %q is not a valid token", s, got.Token)
+		}
+		if got.Secret != "" && (len(got.Secret) != SecretLength || !isSecret(got.Secret)) {
+			t.Fatalf("ParseTarget(%q).Secret = %q is not a valid secret", s, got.Secret)
+		}
+	})
+}
