@@ -84,7 +84,7 @@ chirp-status` for what it could not record.
 copy at start. When a change to it is merged, bring it over and restart:
 
 ```bash
-curl -fsS -o /etc/chirp-status/servers.json https://raw.githubusercontent.com/barahn/chirp/main/network/servers.json && systemctl restart chirp-status
+curl -fsS -o /etc/chirp-status/servers.json https://raw.githubusercontent.com/chirp-remote/chirp/main/network/servers.json && systemctl restart chirp-status
 ```
 
 If the new list is invalid, the service refuses to start and says which entry

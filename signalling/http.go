@@ -115,7 +115,7 @@ func (s *Server) clientIP(r *http.Request) string {
 
 // NewServer returns a Server over sm, routing through its own hub.
 func NewServer(sm *session.SessionManager) *Server {
-	return &Server{
+	s := &Server{
 		hub:      NewHub(sm),
 		sessions: sm,
 		owners:   make(map[rendezvous.PeerID]*ownerConn),
@@ -129,6 +129,8 @@ func NewServer(sm *session.SessionManager) *Server {
 			CheckOrigin: func(*http.Request) bool { return true },
 		},
 	}
+	s.hub.paired = s.askConsent
+	return s
 }
 
 // Hub exposes the underlying hub, for a caller that needs to inspect or close it.
@@ -564,9 +566,7 @@ func (s *Server) attachOwner(id rendezvous.PeerID) {
 	}
 	if err := s.hub.Join(sess.ID, RoleOwner, conn); err != nil {
 		_ = conn.Send(encodeError(err))
-		return
 	}
-	s.maybeAskConsent(sess.ID)
 }
 
 // serveController joins the Chirp that redeemed a code to its session.
@@ -625,8 +625,6 @@ func (s *Server) serveController(w http.ResponseWriter, r *http.Request) {
 		s.hub.Leave(sess.ID, RoleController)
 		_ = peer.Close()
 	}()
-
-	s.maybeAskConsent(sess.ID)
 
 	for {
 		_, data, err := conn.ReadMessage()
@@ -735,21 +733,20 @@ func (s *Server) scheduleEnd(sessionID string, due time.Time) {
 	s.graces[sessionID] = e
 }
 
-// maybeAskConsent asks the owner for consent once both ends are in the hub,
-// and not before: a prompt with nobody behind it is a prompt the owner cannot
-// judge. Whichever end arrives second triggers it; a session already past
-// pending -- a reconnection -- is left alone.
-func (s *Server) maybeAskConsent(sessionID string) {
-	controller, owner := s.hub.Connected(sessionID)
-	if !controller || !owner {
-		return
-	}
+// askConsent asks the owner for consent once both ends are in the hub, and
+// not before: a prompt with nobody behind it is a prompt the owner cannot
+// judge. The hub runs it as the second end joins: the session is moved to
+// asking before either end is told the other is in, so a controller that
+// hears it may take the owner to be asked already, and the prompt goes to the
+// owner after. A session already past pending -- a reconnection -- is left
+// alone.
+func (s *Server) askConsent(sessionID string) (prompt func()) {
 	if _, err := s.sessions.Connect(sessionID); err != nil {
-		return // Another arrival moved it on, or it has ended.
+		return nil // Another arrival moved it on, or it has ended.
 	}
 	sess, err := s.sessions.RequestConsent(sessionID)
 	if err != nil {
-		return
+		return nil
 	}
 	req := bark.ConsentRequestPayload{
 		SessionID:            sess.ID,
@@ -758,7 +755,7 @@ func (s *Server) maybeAskConsent(sessionID string) {
 		RequestedPermissions: append([]string(nil), session.DefaultPermissions...),
 		Timestamp:            time.Now().UTC(),
 	}
-	_ = s.hub.Notify(sessionID, RoleOwner, encodeConsentRequest(req))
+	return func() { _ = s.hub.Notify(sessionID, RoleOwner, encodeConsentRequest(req)) }
 }
 
 func writeJSON(w http.ResponseWriter, status int, v any) {

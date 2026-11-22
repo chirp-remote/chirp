@@ -89,7 +89,7 @@ Some things cannot be checked from outside. By joining, you agree to:
    It must print `ok`.
 
 2. **Apply** with the
-   [*Join the public network* form](https://github.com/barahn/chirp/issues/new?template=join-network.yml).
+   [*Join the public network* form](https://github.com/chirp-remote/chirp/issues/new?template=join-network.yml).
    It asks for what the entry needs (below) and for you to confirm the
    requirements and the commitments.
 

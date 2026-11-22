@@ -20,7 +20,7 @@ func TestHealthzAndProbe(t *testing.T) {
 	ts := httptest.NewServer(routes(relay, "", nil))
 	defer ts.Close()
 
-	if err := probe(strings.TrimPrefix(ts.URL, "http://")); err != nil {
+	if err := probe(parseEndpoint(strings.TrimPrefix(ts.URL, "http://"))); err != nil {
 		t.Fatalf("probe: %v", err)
 	}
 	resp, err := http.Get(ts.URL + "/api/peers")
@@ -37,7 +37,7 @@ func TestProbeFailsWithNothingListening(t *testing.T) {
 	ts := httptest.NewServer(http.NotFoundHandler())
 	addr := strings.TrimPrefix(ts.URL, "http://")
 	ts.Close()
-	if err := probe(addr); err == nil {
+	if err := probe(parseEndpoint(addr)); err == nil {
 		t.Fatal("probe succeeded against a closed port")
 	}
 }
@@ -54,7 +54,7 @@ func TestUnixSocket(t *testing.T) {
 	stale.(*net.UnixListener).SetUnlinkOnClose(false)
 	_ = stale.Close()
 
-	ln, err := listen(addr, 0o660)
+	ln, err := listen(parseEndpoint(addr), 0o660)
 	if err != nil {
 		t.Fatalf("listen over a stale socket: %v", err)
 	}
@@ -69,7 +69,7 @@ func TestUnixSocket(t *testing.T) {
 	srv := &http.Server{Handler: routes(http.NotFoundHandler(), "", nil)}
 	go func() { _ = srv.Serve(ln) }()
 	defer func() { _ = srv.Close() }()
-	if err := probe(addr); err != nil {
+	if err := probe(parseEndpoint(addr)); err != nil {
 		t.Fatalf("probe over the socket: %v", err)
 	}
 }
@@ -79,10 +79,36 @@ func TestListenRefusesToReplaceAFile(t *testing.T) {
 	if err := os.WriteFile(path, []byte("keep me"), 0o600); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := listen("unix:"+path, 0o660); err == nil {
+	if _, err := listen(parseEndpoint("unix:"+path), 0o660); err == nil {
 		t.Fatal("listen replaced a regular file")
 	}
 	if b, _ := os.ReadFile(path); string(b) != "keep me" {
 		t.Fatal("the file was touched")
+	}
+}
+
+func TestProbeDialsLocalhostForAWildcardAddress(t *testing.T) {
+	for addr, want := range map[string]string{
+		":8080":          "localhost:8080",
+		"0.0.0.0:8080":   "localhost:8080",
+		"[::]:8080":      "localhost:8080",
+		"10.0.0.5:8080":  "10.0.0.5:8080",
+		"localhost:8080": "localhost:8080",
+	} {
+		got, err := loopbackTarget(parseEndpoint(addr))
+		if err != nil || got != want {
+			t.Errorf("loopbackTarget(%q) = %q, %v; want %q", addr, got, err, want)
+		}
+	}
+}
+
+func TestSocketModeMustBeAnOctalPermission(t *testing.T) {
+	if perm, err := socketFileMode("0640"); err != nil || perm != 0o640 {
+		t.Fatalf("socketFileMode(0640) = %v, %v", perm, err)
+	}
+	for _, bad := range []string{"", "rw-r-----", "0999", "1777"} {
+		if _, err := socketFileMode(bad); err == nil {
+			t.Errorf("socketFileMode(%q) accepted", bad)
+		}
 	}
 }
