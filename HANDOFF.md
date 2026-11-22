@@ -19,7 +19,7 @@ Read `README.md`, `CONTRIBUTING.md` and `LICENSING.md` before your first
 commit. They are not boilerplate — they encode hard constraints (below).
 
 **Planned work is tracked on GitHub**, in the issues of this repository and the
-[Chirp roadmap](https://github.com/orgs/barahn/projects/2) project, whose
+[Chirp roadmap](https://github.com/orgs/chirp-remote/projects/1) project, whose
 *Track* field orders it. §8 summarises it; when the two disagree, the issues
 are the newer record.
 
@@ -801,7 +801,7 @@ Apache-2.0. Chirp consumes it as a dependency. If you find yourself
 implementing capture or encoding inside Chirp, stop — it belongs upstream.
 
 Tracking: this repository's issues and the
-[Chirp roadmap](https://github.com/orgs/barahn/projects/2) project (§1, §8).
+[Chirp roadmap](https://github.com/orgs/chirp-remote/projects/1) project (§1, §8).
 The separation plan in the proprietary barahn/barahn repository is historical
 background only.
 
@@ -1188,7 +1188,7 @@ Since v0.3.0 there is no `develop`: work lands on `main` by pull request, and
 a release is a tag on `main` (`docs/branching.md`).
 
 Still to decide or do, in order. Each step has an issue, and the
-[Chirp roadmap](https://github.com/orgs/barahn/projects/2) project tracks them:
+[Chirp roadmap](https://github.com/orgs/chirp-remote/projects/1) project tracks them:
 
 1. **Decisions that block the binary: none left.** The link hand-off
    (barahn/chirp#16), the network model (barahn/chirp#19), consent
