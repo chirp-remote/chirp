@@ -17,6 +17,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/barahn/chirp/internal/testnet"
 	"github.com/pion/turn/v5"
 )
 
@@ -24,15 +25,9 @@ const testTURNSecret = "status-prober-turn-secret"
 
 func startInProcessTURN(t *testing.T, auth turn.AuthHandler) string {
 	t.Helper()
-	udpConn, err := net.ListenPacket("udp4", "127.0.0.1:0")
+	udpConn, tcpLn, err := testnet.ListenUDPAndTCP()
 	if err != nil {
 		t.Fatal(err)
-	}
-	port := udpConn.LocalAddr().(*net.UDPAddr).Port
-	tcpLn, err := net.Listen("tcp4", net.JoinHostPort("127.0.0.1", strconv.Itoa(port)))
-	if err != nil {
-		_ = udpConn.Close()
-		t.Fatalf("listen tcp on udp port %d: %v", port, err)
 	}
 
 	gen := &turn.RelayAddressGeneratorStatic{
@@ -101,20 +96,13 @@ func coturnBinary(t *testing.T) string {
 	return ""
 }
 
-func freeUDPPort(t *testing.T) int {
-	t.Helper()
-	c, err := net.ListenPacket("udp4", "127.0.0.1:0")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer func() { _ = c.Close() }()
-	return c.LocalAddr().(*net.UDPAddr).Port
-}
-
 func startCoturn(t *testing.T, secret string) string {
 	t.Helper()
 	bin := coturnBinary(t)
-	port := freeUDPPort(t)
+	port, err := testnet.FreeUDPAndTCPPort()
+	if err != nil {
+		t.Fatal(err)
+	}
 	ctx, cancel := context.WithCancel(context.Background())
 	cmd := exec.CommandContext(ctx, bin,
 		"-n", "--no-cli", "--no-tls", "--no-dtls", "--fingerprint",
