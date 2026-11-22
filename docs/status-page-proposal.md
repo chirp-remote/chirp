@@ -152,7 +152,7 @@ before the public network can carry real sessions. The status page does not
 depend on it and can be built first.
 
 remotekit's
-[`relay-path-selection.md`](https://github.com/barahn/remotekit/blob/main/docs/relay-path-selection.md)
+[`relay-path-selection.md`](https://github.com/chirp-remote/remotekit/blob/main/docs/relay-path-selection.md)
 chooses the TURN relay a session's media crosses, by round trips the peers
 measure themselves. It does not answer this question: a measurement says which
 node is near, not which node holds the registration behind six digits. The

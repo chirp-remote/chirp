@@ -256,7 +256,7 @@ Decided by the maintainer:
 The mechanism behind this — allocating and redeeming codes, minting codes from a
 link, throttling guesses, pairing two peers and relaying their signalling — is
 not specific to Chirp, and belongs in
-[remotekit](https://github.com/barahn/remotekit). The flow, the defaults, the
+[remotekit](https://github.com/chirp-remote/remotekit). The flow, the defaults, the
 consent prompt and the binary are Chirp's. The proposed split is in
 [rendezvous-proposal.md](rendezvous-proposal.md); the general rule is in
 [ECOSYSTEM.md](../ECOSYSTEM.md).

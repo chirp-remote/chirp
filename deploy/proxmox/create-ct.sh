@@ -141,7 +141,7 @@ create_args=(
 	--onboot 1
 	--timezone host
 	--tags chirp
-	--description "Chirp relay. docs/relay.md in https://github.com/barahn/chirp"
+	--description "Chirp relay. docs/relay.md in https://github.com/chirp-remote/chirp"
 )
 [ -z "$SSH_KEY" ] || create_args+=(--ssh-public-keys "$SSH_KEY")
 
