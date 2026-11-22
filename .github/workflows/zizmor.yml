@@ -1,0 +1,53 @@
+name: Workflow Audit
+
+# Workflows are code that runs with repository tokens and release privileges.
+# actionlint checks workflow syntax, expression types and embedded shell scripts
+# (via shellcheck); zizmor audits workflows and dependabot.yml for template
+# injection, cache poisoning, unpinned uses, excessive permissions and other
+# GitHub Actions supply-chain flaws.
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: '23 4 * * 3'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  workflows:
+    name: zizmor & actionlint
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      security-events: write # upload zizmor's SARIF result to the Security tab
+      actions: read          # required by codeql-action/upload-sarif
+    steps:
+      - uses: step-security/harden-runner@aebdcf6156ab6691adf63218240e476564a1ed4c # v2.23.0
+        continue-on-error: true
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: zizmorcore/zizmor-action@45d7276c9ca790aabd705e31ca99c6185c3e76dd # v0.8.1
+        with:
+          advanced-security: ${{ vars.CODE_SCANNING == 'true' }}
+          annotations: ${{ vars.CODE_SCANNING != 'true' }}
+
+      - uses: actions/setup-go@d8cbb8045d7f43706b9177cceb36c1f91a6644d5 # v7.1.0
+        with:
+          go-version: '1.26'
+          check-latest: true
+
+      - name: Lint workflows (actionlint)
+        run: go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.12 -color
