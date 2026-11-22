@@ -47,7 +47,7 @@ Chirp is one of three repositories:
 
 | Repository | Licence | What it is |
 |---|---|---|
-| [remotekit](https://github.com/barahn/remotekit) | Apache-2.0 | shared remote-session core: capture, encode, input, transport |
+| [remotekit](https://github.com/chirp-remote/remotekit) | Apache-2.0 | shared remote-session core: capture, encode, input, transport |
 | this repository | AGPL-3.0-only | the on-demand support session layer |
 | Barahn | Proprietary | Fabrintek's commercial platform |
 

@@ -11,19 +11,19 @@ account, and nothing happens on your screen until you press *Allow*.
 
 **[usechirp.app](https://usechirp.app)** ·
 [How Chirp works](docs/product-model.md) ·
-[Wiki](https://github.com/barahn/chirp/wiki) ·
+[Wiki](https://github.com/chirp-remote/chirp/wiki) ·
 [Roadmap](https://github.com/orgs/barahn/projects/2)
 
 [![License](https://img.shields.io/badge/License-AGPL--3.0-blue.svg?style=flat-square)](LICENSE)
-[![CI](https://github.com/barahn/chirp/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/barahn/chirp/actions/workflows/ci.yml)
-[![CodeQL](https://github.com/barahn/chirp/actions/workflows/codeql.yml/badge.svg?branch=main)](https://github.com/barahn/chirp/actions/workflows/codeql.yml)
+[![CI](https://github.com/chirp-remote/chirp/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/chirp-remote/chirp/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/chirp-remote/chirp/actions/workflows/codeql.yml/badge.svg?branch=main)](https://github.com/chirp-remote/chirp/actions/workflows/codeql.yml)
 [![CodeScene Average Code Health](https://codescene.io/projects/87671/status-badges/average-code-health)](https://codescene.io/projects/87671)
 
 </div>
 
 > [!IMPORTANT]
 > **Chirp is pre-1.0.** Builds for Windows and Linux are on the
-> [Releases](https://github.com/barahn/chirp/releases) page (with Sigstore
+> [Releases](https://github.com/chirp-remote/chirp/releases) page (with Sigstore
 > signatures and build attestations; see [docs/release.md](docs/release.md)),
 > and sessions have been validated end-to-end across Windows 11 and Linux.
 > Before 1.0, code-signed OS binaries, a TURN relay for strict NATs, and making
@@ -145,7 +145,7 @@ Chirp is in pre-1.0 active development (`v0.5.0` is the latest release).
 **Not here yet:**
 
 - **Code-signed OS binaries.** Release builds for Windows and Linux are on the
-  [Releases](https://github.com/barahn/chirp/releases) page with Sigstore-signed
+  [Releases](https://github.com/chirp-remote/chirp/releases) page with Sigstore-signed
   `SHA256SUMS` and build provenance attestations ([docs/release.md](docs/release.md)),
   and macOS `.app` signing scripts are in tree (`scripts/sign-macos-app.sh`),
   but Windows Authenticode and macOS release downloads are still to come
@@ -198,7 +198,7 @@ CHIRP_RELAY=http://localhost:8080 CHIRP_NOSTR=wss://nostr.example.net go run ./c
 Chirp is one of three repositories, and the one you want depends on what you
 are looking for:
 
-- **[remotekit](https://github.com/barahn/remotekit)** (Apache-2.0) is the
+- **[remotekit](https://github.com/chirp-remote/remotekit)** (Apache-2.0) is the
   reusable mechanism: screen capture, VP8 encoding, input injection,
   clipboard, file transfer, WebRTC. Chirp consumes it as a dependency rather
   than reimplementing it.
@@ -228,7 +228,7 @@ repository settings that back it, are in
 ## Contributing
 
 Issues and bug reports are welcome, and questions, ideas and design discussion
-go in [Discussions](https://github.com/barahn/chirp/discussions) (never post a
+go in [Discussions](https://github.com/chirp-remote/chirp/discussions) (never post a
 Chirp code or link there). Everyone taking part follows the
 [Code of Conduct](CODE_OF_CONDUCT.md). Pull requests from outside Fabrintek
 will not be merged yet.

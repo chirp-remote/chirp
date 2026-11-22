@@ -206,7 +206,7 @@ The list carries only what a Chirp needs to pick a server and check it:
   "serial": 4182,
   "issued": "2026-11-16T12:00:00Z",
   "expires": "2026-11-23T12:00:00Z",
-  "source": "https://github.com/barahn/chirp/blob/<commit>/network/servers.json",
+  "source": "https://github.com/chirp-remote/chirp/blob/<commit>/network/servers.json",
   "members": [
     {"id": "node-sp-01", "kind": "node", "url": "https://relay.example.org", "node_key": "ed25519:…"},
     {"id": "nostr-a", "kind": "nostr", "url": "wss://nostr.example.net"},
@@ -307,7 +307,7 @@ it says:
 | Field | Required value |
 |---|---|
 | OIDC issuer (`--certificate-oidc-issuer`) | `https://token.actions.githubusercontent.com`, exactly |
-| Identity, the certificate's SAN (`--certificate-identity`) | `https://github.com/barahn/chirp-status/.github/workflows/network-list.yml@refs/heads/main`, exactly |
+| Identity, the certificate's SAN (`--certificate-identity`) | `https://github.com/chirp-remote/chirp-status/.github/workflows/network-list.yml@refs/heads/main`, exactly |
 | Source repository identifier | the numeric ID of `chirp-status` |
 | Source repository owner identifier | the numeric ID of its owner |
 | Workflow trigger | `schedule` or `push` |

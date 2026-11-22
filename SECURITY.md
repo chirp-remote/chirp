@@ -90,7 +90,7 @@ past its per-origin limits.
 ## Out of scope
 
 The proprietary Barahn control plane (report anything there to Fabrintek
-directly), and [remotekit](https://github.com/barahn/remotekit), which has its
+directly), and [remotekit](https://github.com/chirp-remote/remotekit), which has its
 own policy.
 
 ## What this pipeline enforces, and what it does not

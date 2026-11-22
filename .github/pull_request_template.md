@@ -18,7 +18,7 @@
       committed.
 - [ ] Security impact considered — untrusted input, authentication, sensitive
       data in logs. If there is any, it is described above.
-- [ ] The change sits in the right repository — see [ECOSYSTEM.md](https://github.com/barahn/chirp/blob/main/ECOSYSTEM.md).
+- [ ] The change sits in the right repository — see [ECOSYSTEM.md](https://github.com/chirp-remote/chirp/blob/main/ECOSYSTEM.md).
 
 <!--
 External contributions: pull requests from outside Fabrintek are not merged

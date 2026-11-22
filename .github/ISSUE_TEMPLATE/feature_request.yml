@@ -9,12 +9,12 @@ body:
         > [!WARNING]
         > **Never post an active or historical Chirp code or link**, password, session token, or TURN credential. Redact them from any log, configuration, or screenshot you attach. Issues are public.
         >
-        > Anything that could weaken code generation or redemption, the consent prompt, or the session lifecycle is security-sensitive even when it looks cosmetic. Email [security@fabrintek.com.br](mailto:security@fabrintek.com.br) instead of opening a public issue; see [SECURITY.md](https://github.com/barahn/chirp/blob/main/SECURITY.md).
+        > Anything that could weaken code generation or redemption, the consent prompt, or the session lifecycle is security-sensitive even when it looks cosmetic. Email [security@fabrintek.com.br](mailto:security@fabrintek.com.br) instead of opening a public issue; see [SECURITY.md](https://github.com/chirp-remote/chirp/blob/main/SECURITY.md).
   - type: markdown
     attributes:
       value: |
         > [!NOTE]
-        > Exploratory ideas, high-level user stories, and architectural debates are best started in [Discussions](https://github.com/barahn/chirp/discussions). Use this form to track concrete, actionable feature requests.
+        > Exploratory ideas, high-level user stories, and architectural debates are best started in [Discussions](https://github.com/chirp-remote/chirp/discussions). Use this form to track concrete, actionable feature requests.
         >
         > Chirp's core commitments: **No feature gates**, **explicit consent**, and **unrestricted self-hosting**. Chirp never installs itself or starts automatically with the OS.
   - type: textarea
