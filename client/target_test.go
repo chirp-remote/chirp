@@ -82,19 +82,32 @@ func FuzzParseTarget(f *testing.F) {
 			t.Fatalf("ParseTarget(%q) = %+v, want exactly one of Code or Token", s, got)
 		}
 		if got.Code != "" {
-			if len(got.Code) != 6 {
-				t.Fatalf("ParseTarget(%q).Code = %q, want 6 digits", s, got.Code)
-			}
-			again, err := ParseTarget(got.Code)
-			if err != nil || again.Code != got.Code || again.Secret != "" {
-				t.Fatalf("ParseTarget(%q) -> %+v did not round-trip Code", s, again)
-			}
+			checkCodeRoundTrips(t, s, got.Code)
 		}
-		if got.Token != "" && (len(got.Token) != 43 || !isToken(got.Token)) {
+		if got.Token != "" && !validToken(got.Token) {
 			t.Fatalf("ParseTarget(%q).Token = %q is not a valid token", s, got.Token)
 		}
-		if got.Secret != "" && (len(got.Secret) != SecretLength || !isSecret(got.Secret)) {
+		if got.Secret != "" && !validSecret(got.Secret) {
 			t.Fatalf("ParseTarget(%q).Secret = %q is not a valid secret", s, got.Secret)
 		}
 	})
+}
+
+func checkCodeRoundTrips(t *testing.T, s, code string) {
+	t.Helper()
+	if len(code) != 6 {
+		t.Fatalf("ParseTarget(%q).Code = %q, want 6 digits", s, code)
+	}
+	again, err := ParseTarget(code)
+	if err != nil || again.Code != code || again.Secret != "" {
+		t.Fatalf("ParseTarget(%q) -> %+v did not round-trip Code", s, again)
+	}
+}
+
+func validToken(s string) bool {
+	return len(s) == 43 && isToken(s)
+}
+
+func validSecret(s string) bool {
+	return len(s) == SecretLength && isSecret(s)
 }

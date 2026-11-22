@@ -159,12 +159,23 @@ func FuzzValidateContact(f *testing.F) {
 		if err := session.ValidateContact(session.Contact{Key: k, Relays: []string{relay}}); err != nil {
 			return
 		}
-		if len(k) != 64 || k != strings.ToLower(k) {
+		if !lowercaseKey(k) {
 			t.Fatalf("ValidateContact accepted invalid key %q", k)
 		}
-		u, err := url.Parse(relay)
-		if err != nil || (u.Scheme != "ws" && u.Scheme != "wss") || u.Host == "" || u.User != nil {
+		if !websocketRelay(relay) {
 			t.Fatalf("ValidateContact accepted invalid relay %q", relay)
 		}
 	})
+}
+
+func lowercaseKey(k string) bool {
+	return len(k) == 64 && k == strings.ToLower(k)
+}
+
+func websocketRelay(relay string) bool {
+	u, err := url.Parse(relay)
+	if err != nil || u.Host == "" || u.User != nil {
+		return false
+	}
+	return u.Scheme == "ws" || u.Scheme == "wss"
 }
