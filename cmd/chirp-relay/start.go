@@ -35,10 +35,10 @@ func logListening(ln net.Listener, trusted []netip.Prefix) {
 	}
 }
 
-// exitWithHealth asks the relay at addr whether it is up, and exits 0 if it
+// exitWithHealth asks the relay at e whether it is up, and exits 0 if it
 // is, 1 if not.
-func exitWithHealth(addr string) {
-	if err := probe(addr); err != nil {
+func exitWithHealth(e endpoint) {
+	if err := probe(e); err != nil {
 		fmt.Fprintf(os.Stderr, "chirp-relay: %v\n", err)
 		os.Exit(1)
 	}

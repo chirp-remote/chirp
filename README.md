@@ -12,7 +12,7 @@ account, and nothing happens on your screen until you press *Allow*.
 **[usechirp.app](https://usechirp.app)** ·
 [How Chirp works](docs/product-model.md) ·
 [Wiki](https://github.com/chirp-remote/chirp/wiki) ·
-[Roadmap](https://github.com/orgs/barahn/projects/2)
+[Roadmap](https://github.com/orgs/chirp-remote/projects/1)
 
 [![License](https://img.shields.io/badge/License-AGPL--3.0-blue.svg?style=flat-square)](LICENSE)
 [![CI](https://github.com/chirp-remote/chirp/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/chirp-remote/chirp/actions/workflows/ci.yml)
@@ -159,7 +159,7 @@ Chirp is in pre-1.0 active development (`v0.5.0` is the latest release).
   signalling (`-nostr`) and the PAKE, are in.
 
 Planned work is in this repository's issues and the
-[Chirp roadmap](https://github.com/orgs/barahn/projects/2) project.
+[Chirp roadmap](https://github.com/orgs/chirp-remote/projects/1) project.
 
 ### Try it from source
 
