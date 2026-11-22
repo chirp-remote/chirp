@@ -9,7 +9,7 @@ body:
         > [!IMPORTANT]
         > **Applications are suspended** until the network's design is approved as a whole. An application opened now waits until then, and its rules may change before it is reviewed.
 
-        Read [Joining the public network](https://github.com/barahn/chirp/blob/main/docs/joining-the-network.md) first: what joining means today, what your relay needs, and what you agree to.
+        Read [Joining the public network](https://github.com/chirp-remote/chirp/blob/main/docs/joining-the-network.md) first: what joining means today, what your relay needs, and what you agree to.
 
         > [!WARNING]
         > **Everything you write here is public**, and becomes your entry in `network/servers.json`. Never post a Chirp code or link, a password, a token or a TURN credential.

@@ -36,7 +36,7 @@ FROM gcr.io/distroless/static-debian13:nonroot@sha256:aafe993665bf6200db38a02c11
 
 LABEL org.opencontainers.image.title="chirp-relay" \
       org.opencontainers.image.description="Chirp's self-hosted relay: codes, links, consent and WebRTC signalling" \
-      org.opencontainers.image.source="https://github.com/barahn/chirp" \
+      org.opencontainers.image.source="https://github.com/chirp-remote/chirp" \
       org.opencontainers.image.licenses="AGPL-3.0-only" \
       org.opencontainers.image.vendor="Fabrintek Engenharia Digital Ltda"
 

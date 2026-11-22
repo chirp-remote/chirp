@@ -15,7 +15,7 @@
 
 [Unit]
 Description=Chirp status service
-Documentation=https://github.com/barahn/chirp/blob/main/docs/status-service.md
+Documentation=https://github.com/chirp-remote/chirp/blob/main/docs/status-service.md
 After=network-online.target
 Wants=network-online.target
 

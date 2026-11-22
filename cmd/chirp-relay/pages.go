@@ -93,7 +93,7 @@ func pages(mux *http.ServeMux, contact string, now func() time.Time) {
 		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 		expires := now().UTC().Add(securityTxtFor).Truncate(24 * time.Hour)
 		_, _ = fmt.Fprintf(w, "# This relay's operator. For flaws in Chirp itself:\n"+
-			"# https://github.com/barahn/chirp/security/policy\n"+
+			"# https://github.com/chirp-remote/chirp/security/policy\n"+
 			"Contact: %s\nExpires: %s\n", contact, expires.Format(time.RFC3339))
 	})
 }

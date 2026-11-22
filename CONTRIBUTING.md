@@ -7,8 +7,8 @@ License Agreement below is enforced automatically in this repository.
 
 Issues, bug reports, reproduction cases and design discussion are welcome and
 wanted. It is only code that has to wait. Bugs go in
-[issues](https://github.com/barahn/chirp/issues); questions, ideas and design
-go in [Discussions](https://github.com/barahn/chirp/discussions), where
+[issues](https://github.com/chirp-remote/chirp/issues); questions, ideas and design
+go in [Discussions](https://github.com/chirp-remote/chirp/discussions), where
 *Design* is the place to argue with a decision before anyone writes code.
 
 **Why.** Chirp is dual-licensed: AGPL-3.0-only to the public, and separately to

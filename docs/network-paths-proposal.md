@@ -320,7 +320,7 @@ X sees the owner and Y; Y sees the controller and X. Neither sees both ends.
 
 The owner gets its credential from its own node, as in part 1. The controller
 picks Y by the round trips it measures (remotekit's
-[`relay-path-selection.md`](https://github.com/barahn/remotekit/blob/main/docs/relay-path-selection.md))
+[`relay-path-selection.md`](https://github.com/chirp-remote/remotekit/blob/main/docs/relay-path-selection.md))
 and tells the owner. The owner's node then signs a voucher,
 `chirp-turn-voucher/v1 ∥ Y's id ∥ expiry ∥ nonce`, which the owner passes to
 the controller as it would a credential. The controller presents it to Y,

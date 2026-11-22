@@ -123,7 +123,7 @@ The milestones on GitHub reflect this progression:
 | `chirp-sbom.spdx.json` | The SBOM, from `sbom.yml`. |
 
 The names carry no version, so
-`https://github.com/barahn/chirp/releases/latest/download/chirp-windows-amd64.exe`
+`https://github.com/chirp-remote/chirp/releases/latest/download/chirp-windows-amd64.exe`
 always serves the newest one.
 
 Until remotekit captures the screen and injects input on macOS
@@ -337,7 +337,7 @@ sha256sum --check --ignore-missing SHA256SUMS
 cosign verify-blob SHA256SUMS \
   --bundle SHA256SUMS.sigstore.json \
   --certificate-oidc-issuer https://token.actions.githubusercontent.com \
-  --certificate-identity-regexp '^https://github.com/barahn/chirp/\.github/workflows/release\.yml@refs/tags/v'
+  --certificate-identity-regexp '^https://github.com/chirp-remote/chirp/\.github/workflows/release\.yml@refs/tags/v'
 
 # The binary was built by that workflow from this repository.
 gh attestation verify chirp-linux-amd64 --repo barahn/chirp

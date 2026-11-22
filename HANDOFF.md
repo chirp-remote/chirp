@@ -796,7 +796,7 @@ From `README.md`'s own "not here yet" list:
 
 **The remote-session mechanism is not yours to write.** Screen capture, VP8
 encoding, input injection, clipboard, file transfer, WebRTC and the reverse
-tunnel live in [remotekit](https://github.com/barahn/remotekit) under
+tunnel live in [remotekit](https://github.com/chirp-remote/remotekit) under
 Apache-2.0. Chirp consumes it as a dependency. If you find yourself
 implementing capture or encoding inside Chirp, stop — it belongs upstream.
 
