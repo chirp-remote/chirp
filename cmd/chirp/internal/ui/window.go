@@ -467,8 +467,6 @@ func (w *Window) ApplyHelper(ev client.HelperEvent) {
 	}
 }
 
-// ShowNoServer replaces the window's content when there is no usable relay
-// address. addr is what was given, if anything.
 // ShowElevated replaces the window's content with why Chirp will not run as
 // administrator (barahn/chirp#117, option 1). It is shown instead of a code:
 // nothing is registered with the relay.
@@ -480,6 +478,8 @@ func (w *Window) ShowElevated() {
 	)))
 }
 
+// ShowNoServer replaces the window's content when there is no usable relay
+// address. addr is what was given, if anything.
 func (w *Window) ShowNoServer(addr string) {
 	title := tr(noServerTitle)
 	if addr != "" {

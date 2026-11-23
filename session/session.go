@@ -244,8 +244,9 @@ func (s *Session) overdueLocked(now time.Time) bool {
 	switch s.State {
 	case StatePending, StateConnected, StateConsentRequested:
 		return !now.Before(s.ExpiresAt)
+	default:
+		return false
 	}
-	return false
 }
 
 // expireLocked ends an overdue session at its deadline, releases its consent

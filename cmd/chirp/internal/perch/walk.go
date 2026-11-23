@@ -133,7 +133,8 @@ func Shooer(r Rules) func(now time.Time) bool {
 				kept = append(kept, t)
 			}
 		}
-		passes = append(kept, now)
+		kept = append(kept, now)
+		passes = kept
 		if len(passes) < r.Passes {
 			return false
 		}

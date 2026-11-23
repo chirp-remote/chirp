@@ -125,17 +125,17 @@ func TestSecurityTxt(t *testing.T) {
 }
 
 func TestSecurityContact(t *testing.T) {
-	good := map[string]string{
-		"":                             "",
-		"security@example.org":         "mailto:security@example.org",
-		" security@example.org ":       "mailto:security@example.org",
-		"mailto:security@example.org":  "mailto:security@example.org",
-		"https://example.org/security": "https://example.org/security",
+	good := []struct{ in, want string }{
+		{"", ""},
+		{"security@example.org", "mailto:security@example.org"},
+		{" security@example.org ", "mailto:security@example.org"},
+		{"mailto:security@example.org", "mailto:security@example.org"},
+		{"https://example.org/security", "https://example.org/security"},
 	}
-	for in, want := range good {
-		got, err := securityContact(in)
-		if err != nil || got != want {
-			t.Errorf("securityContact(%q) = %q, %v; want %q", in, got, err, want)
+	for _, tc := range good {
+		got, err := securityContact(tc.in)
+		if err != nil || got != tc.want {
+			t.Errorf("securityContact(%q) = %q, %v; want %q", tc.in, got, err, tc.want)
 		}
 	}
 	for _, in := range []string{
