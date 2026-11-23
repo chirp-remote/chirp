@@ -59,6 +59,11 @@ linters:
           - bodyclose
           - forcetypeassert
           - noctx
+      # internal/testnet only opens loopback ports for tests.
+      - path: ^internal/testnet/
+        linters:
+          - forcetypeassert
+          - noctx
       # status/store.go operates on a single-connection local SQLite file with
       # busy_timeout(5000); Store's synchronous methods take no context.
       - path: ^status/store\.go$
