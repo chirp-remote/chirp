@@ -585,11 +585,7 @@ func (s *Server) serveController(w http.ResponseWriter, r *http.Request) {
 	// when it leaves.
 	held := s.holdSession(id)
 	joined := false
-	defer func() {
-		if !joined && held != nil {
-			s.scheduleEnd(id, held.due)
-		}
-	}()
+	defer func() { s.putBackUnlessJoined(id, held, joined) }()
 	sess, err := s.sessions.GetSession(id)
 	if err != nil {
 		writeSessionError(w, err)
@@ -633,6 +629,14 @@ func (s *Server) serveController(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	}
+}
+
+// putBackUnlessJoined puts back the end held by an attempt that never joined.
+func (s *Server) putBackUnlessJoined(sessionID string, held *graceEnd, joined bool) {
+	if joined || held == nil {
+		return
+	}
+	s.scheduleEnd(sessionID, held.due)
 }
 
 // letControllerGo takes a controller that joined out of its session. One that
