@@ -161,7 +161,7 @@ network it is ("a symmetric NAT", "a mobile network behind CGNAT"), not whose.
 ## Reporting security vulnerabilities
 
 Do **not** open a public issue for a security-sensitive bug. Email
-[security@fabrintek.com.br](mailto:security@fabrintek.com.br). Scope, response
+[security@usechirp.app](mailto:security@usechirp.app). Scope, response
 targets and disclosure terms are in [SECURITY.md](SECURITY.md).
 
 Chirp hands a remote technician control of someone else's desktop. A defect in
@@ -172,4 +172,4 @@ security-sensitive even when it looks cosmetic.
 
 Participation in this project is governed by the [Code of Conduct](CODE_OF_CONDUCT.md).
 Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported to [security@fabrintek.com.br](mailto:security@fabrintek.com.br).
+reported to [security@usechirp.app](mailto:security@usechirp.app).
