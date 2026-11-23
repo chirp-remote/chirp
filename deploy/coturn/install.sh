@@ -14,11 +14,11 @@
 #
 # Usage (as root, from a checkout or a copy of deploy/coturn):
 #
-#   ./install.sh --capacity-mbps N [--external-ip PUBLIC/PRIVATE]
+#   ./install.sh --sessions N [--external-ip PUBLIC/PRIVATE]
 #                [--secret-file PATH] [--ports MIN-MAX] [--config TEMPLATE]
 #
-#   --capacity-mbps  what the whole server may relay, in Mbit/s: about half
-#                    of the uplink's measured upload floor
+#   --sessions       how many sessions it may relay at once; each holds two
+#                    allocations, and each allocation reserves max-bps
 #   --external-ip    behind NAT: the public address and this machine's
 #   --secret-file    the shared secret; created, mode 600, if it does not
 #                    exist (default /etc/coturn/chirp-turn.secret)
@@ -33,7 +33,7 @@ HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TEMPLATE="$HERE/turnserver.conf"
 SECRET_FILE=/etc/coturn/chirp-turn.secret
 EXTERNAL_IP=""
-CAPACITY_MBPS=""
+SESSIONS=""
 PORTS=49160-49459
 
 usage() {
@@ -45,7 +45,7 @@ while [ $# -gt 0 ]; do
 	--config) TEMPLATE="${2:?}"; shift 2 ;;
 	--secret-file) SECRET_FILE="${2:?}"; shift 2 ;;
 	--external-ip) EXTERNAL_IP="${2:?}"; shift 2 ;;
-	--capacity-mbps) CAPACITY_MBPS="${2:?}"; shift 2 ;;
+	--sessions) SESSIONS="${2:?}"; shift 2 ;;
 	--ports) PORTS="${2:?}"; shift 2 ;;
 	-h | --help) usage ;;
 	*) echo "error: unknown argument: $1" >&2; usage ;;
@@ -57,7 +57,9 @@ die() { printf 'error: %s\n' "$*" >&2; exit 1; }
 
 [ "$(id -u)" -eq 0 ] || die "run as root"
 [ -r "$TEMPLATE" ] || die "no template at $TEMPLATE"
-[[ "$CAPACITY_MBPS" =~ ^[1-9][0-9]*$ ]] || die "--capacity-mbps N is required: about half of the uplink's measured upload floor, in Mbit/s"
+[[ "$SESSIONS" =~ ^[1-9][0-9]*$ ]] || die "--sessions N is required: how many sessions the server may relay at once"
+MAX_BPS="$(sed -n 's/^max-bps=\([0-9][0-9]*\)$/\1/p' "$TEMPLATE")"
+[ -n "$MAX_BPS" ] || die "no max-bps in $TEMPLATE"
 [[ "$PORTS" =~ ^([0-9]+)-([0-9]+)$ ]] || die "--ports must be MIN-MAX"
 MIN_PORT="${BASH_REMATCH[1]}"
 MAX_PORT="${BASH_REMATCH[2]}"
@@ -92,7 +94,7 @@ else
 fi
 conf="${conf//@MIN_PORT@/$MIN_PORT}"
 conf="${conf//@MAX_PORT@/$MAX_PORT}"
-conf="${conf//@BPS_CAPACITY@/$((CAPACITY_MBPS * 125000))}"
+conf="${conf//@BPS_CAPACITY@/$((SESSIONS * 2 * MAX_BPS))}"
 case "$conf" in *@*@*) die "the template has a value this script does not fill" ;; esac
 
 if [ -f /etc/turnserver.conf ]; then

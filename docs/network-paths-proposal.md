@@ -87,7 +87,7 @@ allocation to a registration.
 | Credentials per registration | relay | 8 per hour, two per session |
 | Allocations per credential | coturn `user-quota` | 2 |
 | Bandwidth per allocation | coturn `max-bps` | sized to the uplink |
-| Bandwidth for the whole server | coturn `bps-capacity` | sized to the uplink |
+| Bandwidth for the whole server | coturn `bps-capacity` | a number of sessions, see below |
 | Peers it may reach | coturn `denied-peer-ip` | private ranges, as `stun-turn.md` lists |
 
 Abuse is bounded by registrations: one origin holds at most 30 peers
@@ -95,6 +95,16 @@ Abuse is bounded by registrations: one origin holds at most 30 peers
 capped by `max-bps`, all capped by `bps-capacity`. TURN carries every byte of
 a relayed session, so on the reference deployment the caps come from its host uplink, not from a
 round number.
+
+coturn reserves an allocation's whole `max-bps` against `bps-capacity` when it
+opens, whatever it then carries, and hands it back only once the client's
+session closes, a few minutes after the allocation ends. Sized to half the
+uplink, the reference node's cap held five allocations: two relayed sessions,
+after which coturn refused every allocation with
+`486 Allocation Bandwidth Quota Reached`. So `bps-capacity` is set as a number
+of sessions, two allocations of `max-bps` each, and since a shared screen sends
+far less than VP8's ceiling that number is sized from what sessions really
+send.
 
 ### A session outlives its credential
 
