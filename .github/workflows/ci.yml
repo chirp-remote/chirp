@@ -161,6 +161,15 @@ jobs:
           CHIRP_REQUIRE_COTURN: "1"
         run: go test -race -coverprofile=coverage.out ./...
 
+      - name: Fuzz
+        run: |
+          go test -run='^$' -fuzz='^FuzzParseTarget$' -fuzztime=4s ./client
+          go test -run='^$' -fuzz='^FuzzFormatCode$' -fuzztime=4s ./cmd/chirp/internal/ui
+          go test -run='^$' -fuzz='^FuzzValidateContact$' -fuzztime=4s ./session
+          go test -run='^$' -fuzz='^FuzzParsePrefixes$' -fuzztime=4s ./signalling
+          go test -run='^$' -fuzz='^FuzzForwardedFor$' -fuzztime=4s ./signalling
+          go test -run='^$' -fuzz='^FuzzRelayTyped$' -fuzztime=4s ./signalling
+
       # HANDOFF.md's snapshot block is generated from the tree. Checked here
       # rather than committed by a bot: a workflow pushing to main would need a
       # bypass of the branch protection in .github/rulesets/. See docs/branching.md.

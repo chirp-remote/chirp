@@ -5,6 +5,7 @@ package session_test
 
 import (
 	"errors"
+	"net/url"
 	"strings"
 	"testing"
 	"time"
@@ -141,5 +142,45 @@ func TestLookupSharesTheRedemptionBudget(t *testing.T) {
 	}
 	if _, err := sm.Redeem(string(p.Code), "c", info()); !errors.Is(err, session.ErrThrottled) {
 		t.Fatalf("redeem after failed lookups: %v, want ErrThrottled", err)
+	}
+}
+
+func FuzzValidateContact(f *testing.F) {
+	f.Add(key, "wss://relay.example.org")
+	f.Add(key, "ws://192.0.2.7:7777/nostr")
+	f.Add(strings.ToUpper(key), "wss://r.example")
+	f.Add(key[:62], "wss://r.example")
+	f.Add(strings.Repeat("g", 64), "wss://r.example")
+	f.Add(key, "https://r.example")
+	f.Add(key, "wss://user:pass@r.example")
+	f.Add(key, "wss://")
+	f.Add(key, "wss://"+strings.Repeat("a", session.MaxContactRelayLen))
+	f.Fuzz(func(t *testing.T, k, relay string) {
+		if err := session.ValidateContact(session.Contact{Key: k, Relays: []string{relay}}); err != nil {
+			return
+		}
+		if !lowercaseKey(k) {
+			t.Fatalf("ValidateContact accepted invalid key %q", k)
+		}
+		if !websocketRelay(relay) {
+			t.Fatalf("ValidateContact accepted invalid relay %q", relay)
+		}
+	})
+}
+
+func lowercaseKey(k string) bool {
+	return len(k) == 64 && k == strings.ToLower(k)
+}
+
+func websocketRelay(relay string) bool {
+	u, err := url.Parse(relay)
+	if err != nil || u.User != nil {
+		return false
+	}
+	switch u.Scheme {
+	case "ws", "wss":
+		return u.Host != ""
+	default:
+		return false
 	}
 }

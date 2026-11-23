@@ -30,7 +30,7 @@ not CLA acceptance, and that external pull requests are not merged yet.
 
 | Workflow | Runs on | Gate |
 | --- | --- | --- |
-| `ci.yml` | push and PR to `main`, tags | DCO, licence gate, build, vet, cross-compile, lint, `go test -race`, `HANDOFF.md` snapshot, gosec, govulncheck; separately, the relay's container image, deploy scripts and Quadlet units |
+| `ci.yml` | push and PR to `main`, tags | DCO, licence gate, build, vet, cross-compile, lint, `go test -race`, a few seconds of fuzzing per parser of untrusted input, `HANDOFF.md` snapshot, gosec, govulncheck; separately, the relay's container image, deploy scripts and Quadlet units |
 | `codeql.yml` | push and PR, weekly — **when `CODE_SCANNING` is set** | CodeQL `security-extended` for Go |
 | `zizmor.yml` | push and PR, weekly | `zizmor` (SARIF when `CODE_SCANNING` is set, annotations otherwise) and `actionlint` over workflows and `dependabot.yml` |
 | `secret-scan.yml` | push and PR, weekly | gitleaks over the PR commit range, or the tree and full history |

@@ -42,3 +42,32 @@ func TestTheCodeFieldAddsTheDashes(t *testing.T) {
 		t.Errorf("typed digits show as %q, cursor at %d", w.target.Text, w.target.CursorColumn)
 	}
 }
+
+func FuzzFormatCode(f *testing.F) {
+	for _, s := range []string{
+		"",
+		"4",
+		"482",
+		"4829",
+		"482913",
+		"4829135",
+		"4829135071",
+		"482 913 5071",
+		"482-913-5071",
+		"482.913",
+		"48291350712",
+		"https://usechirp.app/l#abc",
+		"abc123",
+	} {
+		f.Add(s)
+	}
+	f.Fuzz(func(t *testing.T, s string) {
+		got := formatCode(s)
+		if again := formatCode(got); again != got {
+			t.Fatalf("formatCode is not idempotent: formatCode(%q) = %q, second call = %q", s, got, again)
+		}
+		if got != s && len(got) > len("482-913-5071") {
+			t.Fatalf("formatCode(%q) = %q exceeds formatted code length", s, got)
+		}
+	})
+}

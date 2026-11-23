@@ -20,7 +20,7 @@ type linkFragments struct {
 	} `json:"cases"`
 }
 
-func readLinkFragments(t *testing.T) linkFragments {
+func readLinkFragments(t testing.TB) linkFragments {
 	t.Helper()
 	data, err := os.ReadFile("testdata/link-fragments.json")
 	if err != nil {
