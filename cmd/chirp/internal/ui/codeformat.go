@@ -25,11 +25,11 @@ func formatCode(s string) string {
 		}
 	}
 	d := digits.String()
-	max := 0
+	maxDigits := 0
 	for _, g := range codeGroups {
-		max += g
+		maxDigits += g
 	}
-	if len(d) > max {
+	if len(d) > maxDigits {
 		return s
 	}
 	var out strings.Builder

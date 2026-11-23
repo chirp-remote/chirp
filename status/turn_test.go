@@ -17,6 +17,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/barahn/chirp/internal/testnet"
 	"github.com/pion/turn/v5"
 )
 
@@ -24,7 +25,10 @@ const testTURNSecret = "status-prober-turn-secret"
 
 func startInProcessTURN(t *testing.T, auth turn.AuthHandler) string {
 	t.Helper()
-	udpConn, tcpLn := listenOnOnePort(t)
+	udpConn, tcpLn, err := testnet.ListenUDPAndTCP()
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	gen := &turn.RelayAddressGeneratorStatic{
 		RelayAddress: net.ParseIP("127.0.0.1"),
@@ -43,28 +47,6 @@ func startInProcessTURN(t *testing.T, auth turn.AuthHandler) string {
 	}
 	t.Cleanup(func() { _ = srv.Close() })
 	return udpConn.LocalAddr().String()
-}
-
-// listenOnOnePort finds a port free over both UDP and TCP: a free UDP port
-// may already be taken over TCP by another test.
-func listenOnOnePort(t *testing.T) (net.PacketConn, net.Listener) {
-	t.Helper()
-	var lastErr error
-	for range 20 {
-		udpConn, err := net.ListenPacket("udp4", "127.0.0.1:0")
-		if err != nil {
-			t.Fatal(err)
-		}
-		port := udpConn.LocalAddr().(*net.UDPAddr).Port
-		tcpLn, err := net.Listen("tcp4", net.JoinHostPort("127.0.0.1", strconv.Itoa(port)))
-		if err == nil {
-			return udpConn, tcpLn
-		}
-		_ = udpConn.Close()
-		lastErr = err
-	}
-	t.Fatalf("no port free over both UDP and TCP: %v", lastErr)
-	return nil, nil
 }
 
 // coturnLikeAuth checks the HMAC-SHA1 and expiry only the first time a
@@ -114,20 +96,13 @@ func coturnBinary(t *testing.T) string {
 	return ""
 }
 
-func freeUDPPort(t *testing.T) int {
-	t.Helper()
-	c, err := net.ListenPacket("udp4", "127.0.0.1:0")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer func() { _ = c.Close() }()
-	return c.LocalAddr().(*net.UDPAddr).Port
-}
-
 func startCoturn(t *testing.T, secret string) string {
 	t.Helper()
 	bin := coturnBinary(t)
-	port := freeUDPPort(t)
+	port, err := testnet.FreeUDPAndTCPPort()
+	if err != nil {
+		t.Fatal(err)
+	}
 	ctx, cancel := context.WithCancel(context.Background())
 	cmd := exec.CommandContext(ctx, bin,
 		"-n", "--no-cli", "--no-tls", "--no-dtls", "--fingerprint",

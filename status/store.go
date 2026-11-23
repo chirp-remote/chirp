@@ -173,6 +173,7 @@ func (st *Store) Rollup(id string, today Day) error {
 	if err != nil {
 		return err
 	}
+	defer func() { _ = rows.Close() }()
 	var days []Day
 	for rows.Next() {
 		var d Day

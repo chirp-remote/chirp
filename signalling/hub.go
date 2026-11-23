@@ -101,8 +101,9 @@ func Admissible(s *session.Session) error {
 	switch s.State {
 	case session.StateExpired, session.StateTerminated, session.StateConsentDenied:
 		return ErrNotPermitted
+	default:
+		return nil
 	}
-	return nil
 }
 
 // Hub routes messages between the peers of each session.

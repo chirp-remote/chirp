@@ -167,7 +167,7 @@ func (s *permSwitch) TypedKey(*fyne.KeyEvent) {}
 
 // withAlpha is c with its alpha replaced, for a tint of a theme colour.
 func withAlpha(c color.Color, a uint8) color.Color {
-	n := color.NRGBAModel.Convert(c).(color.NRGBA)
+	n, _ := color.NRGBAModel.Convert(c).(color.NRGBA)
 	n.A = a
 	return n
 }

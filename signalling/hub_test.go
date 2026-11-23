@@ -5,6 +5,7 @@ package signalling
 
 import (
 	"encoding/json"
+	"errors"
 	"strings"
 	"sync"
 	"testing"
@@ -148,7 +149,7 @@ func TestForwardWithoutTheOtherEndFails(t *testing.T) {
 	// The controller often connects before the owner has joined the
 	// binary. Sending then must report that nobody is there, not pretend the
 	// message was delivered.
-	if err := h.Forward(sess.ID, RoleController, []byte("x")); err != ErrNoPeer {
+	if err := h.Forward(sess.ID, RoleController, []byte("x")); !errors.Is(err, ErrNoPeer) {
 		t.Errorf("forward with no owner = %v, want ErrNoPeer", err)
 	}
 }
@@ -163,7 +164,7 @@ func TestSecondPeerInTheSameRoleIsRejected(t *testing.T) {
 	}
 	// Someone else holding the code must not be able to displace the owner
 	// already in the session by connecting after it.
-	if err := h.Join(sess.ID, RoleOwner, second); err != ErrRoleTaken {
+	if err := h.Join(sess.ID, RoleOwner, second); !errors.Is(err, ErrRoleTaken) {
 		t.Fatalf("second owner = %v, want ErrRoleTaken", err)
 	}
 
@@ -205,7 +206,7 @@ func TestEndedSessionRefusesPeers(t *testing.T) {
 	}
 	// Failing at join, rather than at the first message, is what puts the
 	// error in front of the person while they are still looking at the page.
-	if err := h.Join(sess.ID, RoleOwner, &fakeConn{}); err != ErrNotPermitted {
+	if err := h.Join(sess.ID, RoleOwner, &fakeConn{}); !errors.Is(err, ErrNotPermitted) {
 		t.Errorf("join on ended session = %v, want ErrNotPermitted", err)
 	}
 }
@@ -233,7 +234,7 @@ func TestCloseDropsEveryPeer(t *testing.T) {
 	if !ctrl.isClosed() || !owner.isClosed() {
 		t.Error("Close left a connection open")
 	}
-	if err := h.Join(sess.ID, RoleOwner, &fakeConn{}); err != ErrHubClosed {
+	if err := h.Join(sess.ID, RoleOwner, &fakeConn{}); !errors.Is(err, ErrHubClosed) {
 		t.Errorf("join after close = %v, want ErrHubClosed", err)
 	}
 }
@@ -300,7 +301,7 @@ func TestRejectedPeerIsNotAnnounced(t *testing.T) {
 	ctrl, owner, intruder := &fakeConn{}, &fakeConn{}, &fakeConn{}
 	_ = h.Join(sess.ID, RoleController, ctrl)
 	_ = h.Join(sess.ID, RoleOwner, owner)
-	if err := h.Join(sess.ID, RoleOwner, intruder); err != ErrRoleTaken {
+	if err := h.Join(sess.ID, RoleOwner, intruder); !errors.Is(err, ErrRoleTaken) {
 		t.Fatalf("second owner = %v, want ErrRoleTaken", err)
 	}
 
@@ -356,7 +357,7 @@ func TestForwardRefusesTheRelaysOwnTypes(t *testing.T) {
 		`{"type":"offer","type":"chirp.peer_left"}`, // and the last duplicate wins
 		`{"type":"chirp.peer_left","request":"not an object"}`,
 	} {
-		if err := h.Forward(sess.ID, RoleController, []byte(forged)); err != ErrReservedType {
+		if err := h.Forward(sess.ID, RoleController, []byte(forged)); !errors.Is(err, ErrReservedType) {
 			t.Errorf("Forward(%s) = %v, want ErrReservedType", forged, err)
 		}
 	}
