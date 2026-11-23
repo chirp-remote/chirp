@@ -588,7 +588,7 @@ func (s *Server) serveController(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		switch {
 		case ended:
-			s.scheduleEnd(id, time.Now())
+			// Already ended, before the owner was told the controller left.
 		case joined:
 			s.scheduleEnd(id, time.Now().Add(s.controllerGrace()))
 		case held != nil:
@@ -622,6 +622,9 @@ func (s *Server) serveController(w http.ResponseWriter, r *http.Request) {
 	}
 	joined = true
 	defer func() {
+		if ended {
+			_, _ = s.sessions.EndSession(sess.ID)
+		}
 		s.hub.Leave(sess.ID, RoleController)
 		_ = peer.Close()
 	}()
