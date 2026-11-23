@@ -719,9 +719,6 @@ func TestALeftSessionWaitsForTheControllerWithinTheGrace(t *testing.T) {
 	}
 }
 
-// A controller that ends the session -- a normal close of its socket -- frees
-// its owner at once: the grace is for a controller whose connection dropped,
-// and one that said goodbye is not coming back (barahn/chirp#190).
 // stateAtLeave is an owner's end of a session that reports the session's
 // state at the moment it is told the controller has gone.
 type stateAtLeave struct {
@@ -772,6 +769,9 @@ func TestTheSessionEndsBeforeTheOwnerHearsTheControllerHasGone(t *testing.T) {
 	}
 }
 
+// A controller that ends the session -- a normal close of its socket -- frees
+// its owner at once: the grace is for a controller whose connection dropped,
+// and one that said goodbye is not coming back (barahn/chirp#190).
 func TestAControllerThatEndsFreesTheOwnerAtOnce(t *testing.T) {
 	srv, ts := newServer(t)
 	srv.ControllerGrace = time.Hour

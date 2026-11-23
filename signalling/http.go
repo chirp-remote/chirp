@@ -584,14 +584,9 @@ func (s *Server) serveController(w http.ResponseWriter, r *http.Request) {
 	// session more time. Only a controller that joined schedules a new one,
 	// when it leaves.
 	held := s.holdSession(id)
-	joined, ended := false, false
+	joined := false
 	defer func() {
-		switch {
-		case ended:
-			// Already ended, before the owner was told the controller left.
-		case joined:
-			s.scheduleEnd(id, time.Now().Add(s.controllerGrace()))
-		case held != nil:
+		if !joined && held != nil {
 			s.scheduleEnd(id, held.due)
 		}
 	}()
@@ -621,13 +616,8 @@ func (s *Server) serveController(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	joined = true
-	defer func() {
-		if ended {
-			_, _ = s.sessions.EndSession(sess.ID)
-		}
-		s.hub.Leave(sess.ID, RoleController)
-		_ = peer.Close()
-	}()
+	ended := false
+	defer func() { s.letControllerGo(sess.ID, peer, ended) }()
 
 	for {
 		_, data, err := conn.ReadMessage()
@@ -642,6 +632,22 @@ func (s *Server) serveController(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 		}
+	}
+}
+
+// letControllerGo takes a controller that joined out of its session. One that
+// ended the session frees its owner at once, and the session is over before
+// the owner hears it has gone: an owner told may take itself to be free, and
+// its next helper may come at once. One whose connection dropped gets the
+// grace to dial back.
+func (s *Server) letControllerGo(sessionID string, peer *wsConn, ended bool) {
+	if ended {
+		_, _ = s.sessions.EndSession(sessionID)
+	}
+	s.hub.Leave(sessionID, RoleController)
+	_ = peer.Close()
+	if !ended {
+		s.scheduleEnd(sessionID, time.Now().Add(s.controllerGrace()))
 	}
 }
 
