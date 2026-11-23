@@ -728,16 +728,19 @@ the exact port it sent to, or when both are behind such NATs (barahn/chirp#151).
 It is installed from [`deploy/coturn/`](../deploy/coturn/):
 
 ```bash
-./install.sh --capacity-mbps 50 --external-ip PUBLIC/PRIVATE
+./install.sh --sessions 10 --external-ip PUBLIC/PRIVATE
 ```
 
 - `turnserver.conf` is a template. `install.sh` fills it in, writes
   `/etc/turnserver.conf` readable only by root and coturn, starts coturn and
   checks that it answers STUN.
-- `--capacity-mbps` is what the whole server may relay: about half of the
-  uplink's measured upload floor, not its peak or its contract, since the relay
-  and everything else on the link share it. One allocation is capped at
-  10 Mbit/s, above VP8's ceiling.
+- `--sessions` is how many sessions the server may relay at once. One
+  allocation is capped at 10 Mbit/s, above VP8's ceiling, and a session takes
+  two. coturn reserves that cap in full while an allocation is open, and for a
+  few minutes after, so the whole-server cap counts sessions rather than
+  traffic. A shared screen sends far less than the cap: size `--sessions` from
+  what sessions really send against the uplink's measured upload floor, not
+  from the cap.
 - `--external-ip` is the public address and the machine's own, when the machine
   sits behind NAT.
 - The shared secret is created in `/etc/coturn/chirp-turn.secret` if it is not
