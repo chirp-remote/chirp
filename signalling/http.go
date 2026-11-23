@@ -614,21 +614,31 @@ func (s *Server) serveController(w http.ResponseWriter, r *http.Request) {
 	joined = true
 	ended := false
 	defer func() { s.letControllerGo(sess.ID, peer, ended) }()
+	ended = s.relayController(sess.ID, conn, peer)
+}
 
-	for {
-		_, data, err := conn.ReadMessage()
-		if err != nil {
-			// A normal close is the controller ending the session; anything
-			// else may be a dropped connection, which gets the grace.
-			ended = websocket.IsCloseError(err, websocket.CloseNormalClosure)
-			return
-		}
-		if err := s.hub.Forward(sess.ID, RoleController, data); err != nil {
-			if sendErr := peer.Send(encodeError(err)); sendErr != nil {
-				return
-			}
-		}
+// relayController forwards what a controller sends until its connection ends,
+// and reports whether it ended the session. A normal close is the controller
+// ending it; anything else may be a dropped connection, which gets the grace.
+func (s *Server) relayController(sessionID string, conn *websocket.Conn, peer *wsConn) (ended bool) {
+	var err error
+	for err == nil {
+		err = s.forwardFromController(sessionID, conn, peer)
 	}
+	return websocket.IsCloseError(err, websocket.CloseNormalClosure)
+}
+
+// forwardFromController forwards a controller's next message, or tells it why
+// the hub refused it. The error it returns ends the relay.
+func (s *Server) forwardFromController(sessionID string, conn *websocket.Conn, peer *wsConn) error {
+	_, data, err := conn.ReadMessage()
+	if err != nil {
+		return err
+	}
+	if err := s.hub.Forward(sessionID, RoleController, data); err != nil {
+		return peer.Send(encodeError(err))
+	}
+	return nil
 }
 
 // putBackUnlessJoined puts back the end held by an attempt that never joined.
