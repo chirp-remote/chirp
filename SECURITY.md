@@ -3,7 +3,7 @@
 ## Reporting a vulnerability
 
 **Do not open a public issue.** Email
-[security@fabrintek.com.br](mailto:security@fabrintek.com.br).
+[security@usechirp.app](mailto:security@usechirp.app).
 
 Chirp lets one person control another person's machine. A bug in code or link
 generation, redemption, the lookup, the session lifecycle or the consent flow is

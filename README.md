@@ -9,6 +9,8 @@
 Remote help between two people who trust each other. Nothing to install, no
 account, and nothing happens on your screen until you press *Allow*.
 
+Maintained by Fabrintek Engenharia Digital Ltda.
+
 **[usechirp.app](https://usechirp.app)** ·
 [How Chirp works](docs/product-model.md) ·
 [Wiki](https://github.com/chirp-remote/chirp/wiki) ·
@@ -120,8 +122,8 @@ Chirp is in pre-1.0 active development (`v0.5.0` is the latest release).
   Written for Chirp — no multi-tenancy, no RBAC — rather than taken from the
   proprietary Barahn control plane. [docs/relay.md](docs/relay.md) runs it
   behind TLS in a Proxmox LXC container, with Podman, or on any Linux host.
-- **Fabrintek's relay** — `https://relay.usechirp.app`, which Chirp uses
-  when it is given no relay, with a STUN server on the same name, so two
+- **Chirp's public relay** — `https://relay.usechirp.app`, run by Fabrintek,
+  which Chirp uses when it is given no relay, with a STUN server on the same name, so two
   machines can use Chirp without hosting a relay first. It replaces the test relay at
   `relay-test.usechirp.app`, which is gone. It is the first node in the
   public network's registry (`network/servers.json`), and the status service
@@ -173,7 +175,7 @@ go run ./cmd/chirp-relay
 CHIRP_RELAY=http://localhost:8080 go run ./cmd/chirp
 ```
 
-Given no relay, Chirp uses Fabrintek's, `https://relay.usechirp.app`, and
+Given no relay, Chirp uses its public relay, `https://relay.usechirp.app`, and
 its STUN server, `stun:relay.usechirp.app:3478`, so between two machines it
 needs nothing set:
 
@@ -182,7 +184,7 @@ go run ./cmd/chirp
 ```
 
 The relay only introduces the two Chirps. On different networks they also
-need STUN, and when both are behind a strict NAT, TURN. Fabrintek's network
+need STUN, and when both are behind a strict NAT, TURN. Chirp's public network
 has no TURN yet: it needs per-session credentials (barahn/remotekit#64). With
 a relay of your own, Chirp uses no STUN server unless given one with
 `CHIRP_ICE` ([docs/stun-turn.md](docs/stun-turn.md)).
@@ -215,7 +217,7 @@ belongs in.
 ## Security
 
 Report vulnerabilities privately to
-[security@fabrintek.com.br](mailto:security@fabrintek.com.br) — not in a public
+[security@usechirp.app](mailto:security@usechirp.app) — not in a public
 issue. See [SECURITY.md](SECURITY.md).
 
 Chirp grants remote control of an end user's machine, so its pipeline treats
