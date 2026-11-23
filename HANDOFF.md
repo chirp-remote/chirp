@@ -281,6 +281,8 @@ docs/stun-turn.md
 docs/ux.md
 go.mod
 go.sum
+internal/testnet/testnet.go
+internal/testnet/testnet_test.go
 network/servers.json
 node/node.go
 node/node_test.go
@@ -343,6 +345,7 @@ github.com/barahn/chirp/cmd/chirp/winres
 github.com/barahn/chirp/cmd/chirp/winres/icon
 github.com/barahn/chirp/cmd/chirp-relay
 github.com/barahn/chirp/cmd/chirp-status
+github.com/barahn/chirp/internal/testnet
 github.com/barahn/chirp/node
 github.com/barahn/chirp/scripts/macapp
 github.com/barahn/chirp/session
@@ -365,6 +368,7 @@ ok  	github.com/barahn/chirp/cmd/chirp/winres
 ?   	github.com/barahn/chirp/cmd/chirp/winres/icon	[no test files]
 ok  	github.com/barahn/chirp/cmd/chirp-relay
 ?   	github.com/barahn/chirp/cmd/chirp-status	[no test files]
+ok  	github.com/barahn/chirp/internal/testnet
 ok  	github.com/barahn/chirp/node
 ok  	github.com/barahn/chirp/scripts/macapp
 ok  	github.com/barahn/chirp/session

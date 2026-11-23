@@ -13,6 +13,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/barahn/chirp/internal/testnet"
 	"github.com/pion/turn/v5"
 )
 
@@ -45,7 +46,10 @@ func coturnBinary(t *testing.T) string {
 func startCoturn(t *testing.T, secret string) string {
 	t.Helper()
 	bin := coturnBinary(t)
-	port := freeUDPPort(t)
+	port, err := testnet.FreeUDPAndTCPPort()
+	if err != nil {
+		t.Fatal(err)
+	}
 	ctx, cancel := context.WithCancel(context.Background())
 	cmd := exec.CommandContext(ctx, bin,
 		"-n", "--no-cli", "--no-tls", "--no-dtls", "--no-tcp", "--fingerprint",
@@ -78,18 +82,6 @@ func startCoturn(t *testing.T, secret string) string {
 	addr := net.JoinHostPort("127.0.0.1", strconv.Itoa(port))
 	waitForSTUN(t, addr)
 	return addr
-}
-
-// freeUDPPort finds a UDP port for coturn, which listens on UDP alone
-// (--no-tcp): a TCP listener on the same port may already be taken.
-func freeUDPPort(t *testing.T) int {
-	t.Helper()
-	c, err := net.ListenPacket("udp4", "127.0.0.1:0")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer func() { _ = c.Close() }()
-	return c.LocalAddr().(*net.UDPAddr).Port
 }
 
 func waitForSTUN(t *testing.T, addr string) {
