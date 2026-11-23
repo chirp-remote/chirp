@@ -719,6 +719,56 @@ func TestALeftSessionWaitsForTheControllerWithinTheGrace(t *testing.T) {
 	}
 }
 
+// stateAtLeave is an owner's end of a session that reports the session's
+// state at the moment it is told the controller has gone.
+type stateAtLeave struct {
+	sessions *session.SessionManager
+	id       string
+	told     chan session.SessionState
+}
+
+func (c *stateAtLeave) Send(data []byte) error {
+	var m map[string]string
+	if json.Unmarshal(data, &m) == nil && m["type"] == PeerLeftType {
+		if sess, err := c.sessions.GetSession(c.id); err == nil {
+			c.told <- sess.State
+		}
+	}
+	return nil
+}
+
+func (c *stateAtLeave) Close() error { return nil }
+
+// An owner told that the controller has gone may take itself to be free, and
+// its next helper may come at once: the relay ends the session before it tells.
+func TestTheSessionEndsBeforeTheOwnerHearsTheControllerHasGone(t *testing.T) {
+	srv, ts := newServer(t)
+	srv.ControllerGrace = time.Hour
+	owner := register(t, ts, "Ana")
+	sess, _ := redeem(t, ts, owner.Code, "Bruno")
+	own := &stateAtLeave{sessions: srv.sessions, id: sess.SessionID, told: make(chan session.SessionState, 1)}
+	if err := srv.hub.Join(sess.SessionID, RoleOwner, own); err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { srv.hub.Leave(sess.SessionID, RoleOwner) })
+	ctrl := dialController(t, ts, sess.SessionID)
+	awaitPeer(t, ctrl, RoleOwner)
+
+	bye := websocket.FormatCloseMessage(websocket.CloseNormalClosure, "")
+	if err := ctrl.WriteControl(websocket.CloseMessage, bye, time.Now().Add(time.Second)); err != nil {
+		t.Fatal(err)
+	}
+	_ = ctrl.Close()
+	select {
+	case st := <-own.told:
+		if st != session.StateTerminated {
+			t.Fatalf("the owner heard the controller had gone while the session was %q, want %q", st, session.StateTerminated)
+		}
+	case <-time.After(5 * time.Second):
+		t.Fatal("the owner was never told the controller had gone")
+	}
+}
+
 // A controller that ends the session -- a normal close of its socket -- frees
 // its owner at once: the grace is for a controller whose connection dropped,
 // and one that said goodbye is not coming back (barahn/chirp#190).
